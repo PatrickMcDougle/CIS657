@@ -1,3 +1,9 @@
+/* in file snd.c */
+extern void sndA(void);
+/* in file snd.c */
+extern void sndB(void);
+
+
 /* in file addargs.c */
 extern	status	addargs(pid32, int32, int32[], int32,char *, void *);
 
