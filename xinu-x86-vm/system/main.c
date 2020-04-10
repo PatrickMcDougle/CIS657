@@ -15,8 +15,8 @@ int main(int argc, char const *argv[])
 	printf("   |_|   \\__,_|\\__|_|  |_|\\___|_|\\_\\\n");
 	printf("/* ---------- ---------- ---------- ---------- */\n\n");
 
-	resume(create(sndA, 1024, 50, "sending A", 0));
-	resume(create(sndB, 1024, 50, "sending A", 0));
+	resume(create(sndA, 1024, 20, "sending A", 0));
+	resume(create(sndB, 1024, 40, "sending B", 0));
 
 	return OK;
 }
