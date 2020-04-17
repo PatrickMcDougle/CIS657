@@ -50,6 +50,9 @@ int main(int argc, char const *argv[])
 	return OK;
 }
 
+/* number_print - This is my first attempt at doing the lab based off what I have read. 
+ *  This method will print out numbers.  21 for the first time, 5 additional numbers
+ *  after that. */
 void number_print(
 	sid32 print_number,
 	sid32 print_sentance)
@@ -76,6 +79,8 @@ void number_print(
 	} while (++counter < _COUNTER_MAX);
 }
 
+/* sentance_print - This is my first attempt at doing the lab based off what I have read.
+ *  This method will print out a string. */
 void sentance_print(
 	sid32 print_number,
 	sid32 print_sentance)
@@ -88,6 +93,7 @@ void sentance_print(
 	} while (counter < _COUNTER_MAX);
 }
 
+/* number_print2 - based of the instructions in the lab. */
 void number_print2(
 	sid32 print_sem)
 {
@@ -98,6 +104,7 @@ void number_print2(
 	} while (counter < _COUNTER_MAX);
 }
 
+/* sentance_print2 - based of the instructions in the lab. */
 void sentance_print2(
 	sid32 print_sem)
 {
@@ -108,6 +115,7 @@ void sentance_print2(
 	} while (counter < _COUNTER_MAX);
 }
 
+/* number_print3 - based of the instructions in the lab with some tweeks. */
 void number_print3(
 	sid32 print_number,
 	sid32 print_sentance)
@@ -120,6 +128,7 @@ void number_print3(
 	} while (counter < _COUNTER_MAX);
 }
 
+/* sentance_print3 - based of the instructions in the lab with some tweeks. */
 void sentance_print3(
 	sid32 print_number,
 	sid32 print_sentance)
