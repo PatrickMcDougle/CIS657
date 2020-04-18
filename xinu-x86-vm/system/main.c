@@ -5,21 +5,25 @@
 
 void number_print(sid32, sid32);
 void sentance_print(sid32, sid32);
-void number_print2(sid32);
-void sentance_print2(sid32);
+void number_print2();
+void sentance_print2();
 void number_print3(sid32, sid32);
 void sentance_print3(sid32, sid32);
+void number_print4();
+void sentance_print4();
 
 int counter = 0;
+pid32 pid_number;
+pid32 pid_sentance;
+sid32 print_number;
+sid32 print_sentance;
+sid32 print_sem;
 
 #define _COUNTER_MAX 2000
 
 /* main - just saying hello, then exiting */
 int main(int argc, char const *argv[])
 {
-	sid32 print_number;
-	sid32 print_sentance;
-	sid32 print_sem;
 
 	printf("/* ----------- ---------- ----------- ---------- ----------- */\n");
 	printf("    ___________  _______     ___       ___  ___      _  _    \n");
@@ -33,19 +37,27 @@ int main(int argc, char const *argv[])
 	// print_number = semcreate(0);
 	// print_sentance = semcreate(1);
 
-	// resume(create(number_print, 1024, 20, "print numbers", 2, print_number, print_sentance));
-	// resume(create(sentance_print, 1024, 20, "print sentance", 2, print_number, print_sentance));
+	// pid_number = create(number_print, 1024, 20, "print numbers", 2, print_number, print_sentance);
+	// pid_sentance = create(sentance_print, 1024, 20, "print sentance", 2, print_number, print_sentance);
 
 	// print_sem = semcreate(20);
 
-	// resume(create(number_print2, 1024, 20, "print numbers", 1, print_sem));
-	// resume(create(sentance_print2, 1024, 20, "print sentance", 1, print_sem));
+	// pid_number = create(number_print2, 1024, 20, "print numbers", 0);
+	// pid_sentance = create(sentance_print2, 1024, 20, "print sentance", 0);
 
-	print_number = semcreate(0);
-	print_sentance = semcreate(21);
+	// print_number = semcreate(0);
+	// print_sentance = semcreate(21);
 
-	resume(create(number_print3, 1024, 20, "print numbers", 2, print_number, print_sentance));
-	resume(create(sentance_print3, 1024, 20, "print sentance", 2, print_number, print_sentance));
+	// pid_number = create(number_print3, 1024, 20, "print numbers", 2, print_number, print_sentance);
+	// pid_sentance = create(sentance_print3, 1024, 20, "print sentance", 2, print_number, print_sentance);
+
+	print_sem = semcreate(20);
+
+	pid_number = create(number_print4, 1024, 20, "print numbers version 4", 0);
+	pid_sentance = create(sentance_print4, 1024, 20, "print sentance version 4", 0);
+
+	resume(pid_number);
+	resume(pid_sentance);
 
 	return OK;
 }
@@ -63,20 +75,19 @@ void number_print(
 	wait(print_sentance);
 	for (counter = 1; counter < 22; ++counter)
 	{
-		printf("%d ", counter);
+		kprintf("%d ", counter);
 	}
 	signal(print_number);
 
 	do
 	{
-		five = 0;
 		wait(print_sentance);
-		while (five++ < 5)
+		do
 		{
-			printf("%d ", counter);
-		}
+			kprintf("%d ", counter++);
+		} while (counter % 5 != 2);
 		signal(print_number);
-	} while (++counter < _COUNTER_MAX);
+	} while (counter < _COUNTER_MAX);
 }
 
 /* sentance_print - This is my first attempt at doing the lab based off what I have read.
@@ -88,29 +99,27 @@ void sentance_print(
 	do
 	{
 		wait(print_number);
-		printf("Team 4 Rocks! ");
+		kprintf("Team 4 Rocks! v.A\n");
 		signal(print_sentance);
 	} while (counter < _COUNTER_MAX);
 }
 
 /* number_print2 - based of the instructions in the lab. */
-void number_print2(
-	sid32 print_sem)
+void number_print2()
 {
 	do
 	{
-		printf("%d ", ++counter);
+		kprintf("%d ", ++counter);
 		wait(print_sem);
 	} while (counter < _COUNTER_MAX);
 }
 
 /* sentance_print2 - based of the instructions in the lab. */
-void sentance_print2(
-	sid32 print_sem)
+void sentance_print2()
 {
 	do
 	{
-		printf("Team 4 Rocks! ");
+		kprintf("Team 4 Rocks! v.B3\n");
 		signaln(print_sem, 5);
 	} while (counter < _COUNTER_MAX);
 }
@@ -136,28 +145,42 @@ void sentance_print3(
 	do
 	{
 		wait(print_number);
-		printf("Team 4 Rocks! ");
+		printf("Team 4 Rocks! v.C\n");
 		signaln(print_sentance, 5);
 	} while (counter < _COUNTER_MAX);
 }
 
-// int main(int argc, char **argv)
-// {
-// 	uint32 retval;
+/* number_print - This is my first attempt at doing the lab based off what I have read. 
+ *  This method will print out numbers.  21 for the first time, 5 additional numbers
+ *  after that. */
+void number_print4()
+{
+	// int counter = 0;
+	int five = 0;
 
-// 	resume(create(shell, 8192, 50, "shell", 1, CONSOLE));
+	for (counter = 1; counter < 22; ++counter)
+	{
+		printf("%d ", counter);
+	}
+	wait(print_sem);
 
-// 	/* Wait for shell to exit and recreate it */
+	do
+	{
+		do
+		{
+			printf("%d ", counter++);
+		} while (counter % 5 != 2);
+		wait(print_sem);
+	} while (counter < _COUNTER_MAX);
+}
 
-// 	recvclr();
-// 	while (TRUE)
-// 	{
-// 		retval = receive();
-// 		kprintf("\n\n\rMain process recreating shell\n\n\r");
-// 		resume(create(shell, 4096, 1, "shell", 1, CONSOLE));
-// 	}
-// 	while (1)
-// 		;
-
-// 	return OK;
-// }
+/* sentance_print - This is my first attempt at doing the lab based off what I have read.
+ *  This method will print out a string. */
+void sentance_print4()
+{
+	do
+	{
+		printf("Team 4 Rocks! v.D\n");
+		signal(print_sem);
+	} while (counter < _COUNTER_MAX);
+}
