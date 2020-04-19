@@ -2,28 +2,29 @@
 
 #include <xinu.h>
 
-struct qentry	queuetab[NQENT];	/* table of process queues	*/
+struct qentry queuetab[NQENT]; /* table of process queues	*/
 
 /*------------------------------------------------------------------------
  *  enqueue  -  Insert a process at the tail of a queue
  *------------------------------------------------------------------------
  */
-pid32	enqueue(
-	  pid32		pid,		/* ID of process to insert	*/
-	  qid16		q		/* ID of queue to use		*/
-	)
+pid32 enqueue(
+	pid32 pid, /* ID of process to insert	*/
+	qid16 q	   /* ID of queue to use		*/
+)
 {
-	int	tail, prev;		/* tail & previous node indexes	*/
+	int tail, prev; /* tail & previous node indexes	*/
 
-	if (isbadqid(q) || isbadpid(pid)) {
+	if (isbadqid(q) || isbadpid(pid))
+	{
 		return SYSERR;
 	}
 
 	tail = queuetail(q);
 	prev = queuetab[tail].qprev;
 
-	queuetab[pid].qnext  = tail;	/* insert just before tail node	*/
-	queuetab[pid].qprev  = prev;
+	queuetab[pid].qnext = tail; /* insert just before tail node	*/
+	queuetab[pid].qprev = prev;
 	queuetab[prev].qnext = pid;
 	queuetab[tail].qprev = pid;
 	return pid;
@@ -33,15 +34,18 @@ pid32	enqueue(
  *  dequeue  -  Remove and return the first process on a list
  *------------------------------------------------------------------------
  */
-pid32	dequeue(
-	  qid16		q		/* ID queue to use		*/
-	)
+pid32 dequeue(
+	qid16 q /* ID queue to use		*/
+)
 {
-	pid32	pid;			/* ID of process removed	*/
+	pid32 pid; /* ID of process removed	*/
 
-	if (isbadqid(q)) {
+	if (isbadqid(q))
+	{
 		return SYSERR;
-	} else if (isempty(q)) {
+	}
+	if (isempty(q))
+	{
 		return EMPTY;
 	}
 
