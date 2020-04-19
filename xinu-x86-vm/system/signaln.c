@@ -25,7 +25,7 @@ syscall signaln(
 	semptr = &semtab[sem];
 	for (; count > 0; --count)
 	{
-		if (++(semptr->scount) < 0)
+		if ((semptr->scount++) < 0)
 		{
 			ready(dequeue(semptr->squeue), RESCHED_NO);
 		}
