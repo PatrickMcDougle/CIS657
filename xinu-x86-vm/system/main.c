@@ -1,5 +1,4 @@
 /*  main.c  - main */
-
 #include <xinu.h>
 #include <stdio.h>
 
@@ -18,7 +17,7 @@ sid32 g_sid_semaphore;
 // global define values.
 #define _COUNTER_FIRST 21
 #define _COUNTER_NEXT 5
-#define _COUNTER_MAX 200
+#define _COUNTER_MAX 2000
 
 /*------------------------------------------------------------------------
  *  main - The one that starts it all.
