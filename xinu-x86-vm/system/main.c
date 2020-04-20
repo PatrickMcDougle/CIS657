@@ -5,14 +5,12 @@
 
 void number_print(sid32, sid32);
 void sentance_print(sid32, sid32);
-void number_print2();
-void sentance_print2();
+void number_waiter();
+void sentance_signaler();
 void number_print3(sid32, sid32);
 void sentance_print3(sid32, sid32);
-void number_print4();
-void sentance_print4();
-void number_print5();
-void sentance_print5();
+void number_others();
+void sentance_others();
 
 int32 g_counter = 0;
 pid32 g_pid_number;
@@ -38,30 +36,25 @@ int main(int argc, char const *argv[])
 	kprintf("       |__|     |_______/__/     \\__\\ |__|  |__|       |_|   \n");
 	kprintf("/* ----------- ---------- ----------- ---------- ----------- */\n");
 
-	g_sid_number = semcreate(0);
-	g_sid_sentance = semcreate(1);
-
-	g_pid_number = create(number_print, 1024, 30, "print numbers", 2, g_sid_number, g_sid_sentance);
-	g_pid_sentance = create(sentance_print, 1024, 20, "print sentance", 2, g_sid_number, g_sid_sentance);
-
 	// g_sid_number = semcreate(0);
-	// g_sid_sentance = semcreate(_COUNTER_FIRST);
+	// g_sid_sentance = semcreate(1);
 
-	// g_pid_number = create(number_print3, 1024, 30, "print numbers", 2, g_sid_number, g_sid_sentance);
-	// g_pid_sentance = create(sentance_print3, 1024, 20, "print sentance", 2, g_sid_number, g_sid_sentance);
+	// g_pid_number = create(number_print, 1024, 10, "print numbers", 2, g_sid_number, g_sid_sentance);
+	// g_pid_sentance = create(sentance_print, 1024, 10, "print sentance", 2, g_sid_number, g_sid_sentance);
 
-	// g_sid_semaphore = semcreate(0);
+	g_sid_number = semcreate(0);
+	g_sid_sentance = semcreate(_COUNTER_FIRST);
 
-	// g_pid_number = create(number_print4, 1024, 30, "print numbers version 4", 0);
-	// g_pid_sentance = create(sentance_print4, 1024, 20, "print sentance version 4", 0);
+	g_pid_number = create(number_print3, 1024, 10, "print numbers", 2, g_sid_number, g_sid_sentance);
+	g_pid_sentance = create(sentance_print3, 1024, 10, "print sentance", 2, g_sid_number, g_sid_sentance);
 
 	// g_sid_semaphore = semcreate(_COUNTER_FIRST - 1);
 
-	// g_pid_number = create(number_print2, 1024, 30, "print numbers", 0);
-	// g_pid_sentance = create(sentance_print2, 1024, 20, "print sentance", 0);
+	// g_pid_number = create(number_waiter, 1024, 11, "print numbers waiter", 0);
+	// g_pid_sentance = create(sentance_signaler, 1024, 10, "print sentance signaler", 0);
 
-	// g_pid_number = create(number_print5, 1024, 30, "print numbers version 5", 0);
-	// g_pid_sentance = create(sentance_print5, 1024, 20, "print sentance version 5", 0);
+	// g_pid_number = create(number_others, 1024, 11, "print numbers version 5", 0);
+	// g_pid_sentance = create(sentance_others, 1024, 10, "print sentance version 5", 0);
 
 	resume(g_pid_number);
 	resume(g_pid_sentance);
@@ -69,13 +62,16 @@ int main(int argc, char const *argv[])
 	return OK;
 }
 
-/* ********** ********** ********** ********** ********** *
+/* *********** *********** ********** ********** *********** *********** *
  * Version 1 (A) of my code.
- * ********** ********** ********** ********** ********** */
+ * *********** *********** ********** ********** *********** *********** */
 
-/* number_print - This is my first attempt at doing the lab based off what I have read. 
- *  This method will print out numbers.  21 for the first time, 5 additional numbers
- *  after that. */
+/*------------------------------------------------------------------------
+ *  number_print - This is my first attempt at doing the lab based off
+ *  what I have read.  This method will print out numbers.  21 numbers for
+ *  the first time, 5 additional numbers after that.
+ *------------------------------------------------------------------------
+ */
 void number_print(
 	sid32 print_number,
 	sid32 print_sentance)
@@ -98,8 +94,12 @@ void number_print(
 	} while (g_counter <= _COUNTER_MAX);
 }
 
-/* sentance_print - This is my first attempt at doing the lab based off what I have read.
- *  This method will print out a string. */
+/*------------------------------------------------------------------------
+ *  sentance_print - This is my first attempt at doing the lab based off
+ *  what I have read.  This method will print out a string after each
+ *  number set is done printing.
+ *------------------------------------------------------------------------
+ */
 void sentance_print(
 	sid32 print_number,
 	sid32 print_sentance)
@@ -112,23 +112,28 @@ void sentance_print(
 	} while (g_counter <= _COUNTER_MAX);
 }
 
-/* ********** ********** ********** ********** ********** *
+/* *********** *********** ********** ********** *********** *********** *
  * Version 2 (B) of my code.
- * ********** ********** ********** ********** ********** */
+ * *********** *********** ********** ********** *********** *********** */
 
-/* number_print2 - based of the instructions in the lab. */
-void number_print2()
+/*------------------------------------------------------------------------
+ *  number_waiter - based of the instructions in the lab.
+ *------------------------------------------------------------------------
+ */
+void number_waiter()
 {
-	g_counter = 1;
-	do
+	for (g_counter = 1; g_counter <= _COUNTER_MAX; ++g_counter)
 	{
 		kprintf("%d ", g_counter);
 		wait(g_sid_semaphore);
-	} while (++g_counter <= _COUNTER_MAX);
+	}
 }
 
-/* sentance_print2 - based of the instructions in the lab. */
-void sentance_print2()
+/*------------------------------------------------------------------------
+ *  sentance_signaler - based of the instructions in the lab.
+ *------------------------------------------------------------------------
+ */
+void sentance_signaler()
 {
 	do
 	{
@@ -137,82 +142,56 @@ void sentance_print2()
 	} while (g_counter <= _COUNTER_MAX);
 }
 
-/* ********** ********** ********** ********** ********** *
+/* *********** *********** ********** ********** *********** *********** *
  * Version 3 (C) of my code.
- * ********** ********** ********** ********** ********** */
+ * *********** *********** ********** ********** *********** *********** */
 
-/* number_print3 - based of the instructions in the lab with some tweeks. */
+/*------------------------------------------------------------------------
+ *  number_print3 - based of the instructions in the lab with some tweeks.
+ *------------------------------------------------------------------------
+ */
 void number_print3(
 	sid32 print_number,
 	sid32 print_sentance)
 {
-	g_counter = 1;
-	do
+	for (g_counter = 1; g_counter <= _COUNTER_MAX; ++g_counter)
 	{
+		if (semtab[print_sentance].scount == 0)
+		{
+			signal(print_number);
+		}
 		wait(print_sentance);
 		kprintf("%d ", g_counter);
-		signal(print_number);
-	} while (++g_counter <= _COUNTER_MAX);
+	}
+	signal(print_number);
 }
 
-/* sentance_print3 - based of the instructions in the lab with some tweeks. */
+/*------------------------------------------------------------------------
+ *  sentance_print3 - based of the instructions in the lab with some tweeks.
+ *------------------------------------------------------------------------
+ */
 void sentance_print3(
 	sid32 print_number,
 	sid32 print_sentance)
 {
+	wait(print_number);
 	do
 	{
-		wait(print_number);
 		kprintf("Team 4 Rocks! v.C\n");
 		signaln(print_sentance, _COUNTER_NEXT);
+		wait(print_number);
 	} while (g_counter <= _COUNTER_MAX);
 }
 
-/* ********** ********** ********** ********** ********** *
- * Version 4 (D) of my code.
- * ********** ********** ********** ********** ********** */
+/* *********** *********** ********** ********** *********** *********** *
+ * Version 4 (D) of the code.
+ * *********** *********** ********** ********** *********** *********** */
 
-/* number_print - This is my first attempt at doing the lab based off what I have read. 
- *  This method will print out numbers.  21 for the first time, 5 additional numbers
- *  after that. */
-void number_print4()
-{
-	for (g_counter = 1; g_counter <= _COUNTER_FIRST; ++g_counter)
-	{
-		kprintf("%d ", g_counter);
-	}
-	wait(g_sid_semaphore);
-
-	do
-	{
-		do
-		{
-			kprintf("%d ", g_counter++);
-		} while (g_counter % _COUNTER_NEXT != 2 && g_counter <= _COUNTER_MAX);
-		if (g_counter <= _COUNTER_MAX)
-		{
-			wait(g_sid_semaphore);
-		}
-	} while (g_counter <= _COUNTER_MAX);
-}
-
-/* sentance_print - This is my first attempt at doing the lab based off what I have read.
- *  This method will print out a string. */
-void sentance_print4()
-{
-	do
-	{
-		kprintf("Team 4 Rocks! v.D\n");
-		signal(g_sid_semaphore);
-	} while (g_counter <= _COUNTER_MAX);
-}
-
-/* ********** ********** ********** ********** ********** *
- * Version 5 (E) of my code.
- * ********** ********** ********** ********** ********** */
-
-/* number_print5 - based of the instructions in the lab. */
-void number_print5()
+/*------------------------------------------------------------------------
+ *  number_others - based on what others did in the group.
+ *------------------------------------------------------------------------
+ */
+void number_others()
 {
 	for (g_counter = 1; g_counter <= _COUNTER_MAX; ++g_counter)
 	{
@@ -222,12 +201,15 @@ void number_print5()
 	kill(g_pid_sentance);
 }
 
-/* sentance_print5 - based of the instructions in the lab. */
-void sentance_print5()
+/*------------------------------------------------------------------------
+ *  sentance_others - based on what others did in the group.
+ *------------------------------------------------------------------------
+ */
+void sentance_others()
 {
 	while (TRUE)
 	{
-		kprintf("Team 4 Rocks! v.E\n");
+		kprintf("Team 4 Rocks! v.D\n");
 		signaln(g_sid_semaphore, _COUNTER_NEXT);
 	}
 }
