@@ -3,26 +3,29 @@
 #include <xinu.h>
 #include <stdio.h>
 
+// function/process declaration.
 void number_waiter();
 void sentance_signaler();
 void number_others();
 void sentance_others();
 
+// global values to work with.
 int32 g_counter = 0;
 pid32 g_pid_number;
 pid32 g_pid_sentance;
-sid32 g_sid_number;
-sid32 g_sid_sentance;
 sid32 g_sid_semaphore;
 
+// global define values.
 #define _COUNTER_FIRST 21
 #define _COUNTER_NEXT 5
 #define _COUNTER_MAX 200
 
-/* main - just saying hello, then exiting */
+/*------------------------------------------------------------------------
+ *  main - The one that starts it all.
+ *------------------------------------------------------------------------
+ */
 int main(int argc, char const *argv[])
 {
-
 	kprintf("/* ----------- ---------- ----------- ---------- ----------- */\n");
 	kprintf("    ___________  _______     ___       ___  ___      _  _    \n");
 	kprintf("   |           ||   ____|   /   \\     |   \\/   |    | || |   \n");
@@ -37,8 +40,8 @@ int main(int argc, char const *argv[])
 	g_pid_number = create(number_waiter, 1024, 11, "print numbers waiter", 0);
 	g_pid_sentance = create(sentance_signaler, 1024, 10, "print sentance signaler", 0);
 
-	// g_pid_number = create(number_others, 1024, 11, "print numbers version 5", 0);
-	// g_pid_sentance = create(sentance_others, 1024, 10, "print sentance version 5", 0);
+	// g_pid_number = create(number_others, 1024, 11, "print numbers other", 0);
+	// g_pid_sentance = create(sentance_others, 1024, 10, "print sentance other", 0);
 
 	resume(g_pid_number);
 	resume(g_pid_sentance);
@@ -47,7 +50,7 @@ int main(int argc, char const *argv[])
 }
 
 /* *********** *********** ********** ********** *********** *********** *
- * Version 1 (A) of my code.
+ * Version 1 (A) Patrick's version of the code.
  * *********** *********** ********** ********** *********** *********** */
 
 /*------------------------------------------------------------------------
@@ -77,7 +80,7 @@ void sentance_signaler()
 }
 
 /* *********** *********** ********** ********** *********** *********** *
- * Version 4 (D) of the code.
+ * Version 4 (D) Other team member's version of the code.
  * *********** *********** ********** ********** *********** *********** */
 
 /*------------------------------------------------------------------------
