@@ -6,34 +6,37 @@
  *  kill  -  Kill a process and remove it from the system
  *------------------------------------------------------------------------
  */
-syscall	kill(
-	  pid32		pid		/* ID of process to kill	*/
-	)
+syscall kill(
+	pid32 pid /* ID of process to kill	*/
+)
 {
-	intmask	mask;			/* saved interrupt mask		*/
-	struct	procent *prptr;		/* ptr to process' table entry	*/
-	int32	i;			/* index into descriptors	*/
+	intmask mask;		   /* saved interrupt mask			*/
+	struct procent *prptr; /* ptr to process' table entry	*/
+	int32 i;			   /* index into descriptors		*/
 
 	mask = disable();
-	if (isbadpid(pid) || (pid == NULLPROC)
-	    || ((prptr = &proctab[pid])->prstate) == PR_FREE) {
+	if (isbadpid(pid) || (pid == NULLPROC) || ((prptr = &proctab[pid])->prstate) == PR_FREE)
+	{
 		restore(mask);
 		return SYSERR;
 	}
 
-	if (--prcount <= 1) {		/* last user process completes	*/
+	if (--prcount <= 1)
+	{ /* last user process completes	*/
 		xdone();
 	}
 
 	send(prptr->prparent, pid);
-	for (i=0; i<3; i++) {
+	for (i = 0; i < 3; i++)
+	{
 		close(prptr->prdesc[i]);
 	}
 	freestk(prptr->prstkbase, prptr->prstklen);
 
-	switch (prptr->prstate) {
+	switch (prptr->prstate)
+	{
 	case PR_CURR:
-		prptr->prstate = PR_FREE;	/* suicide */
+		prptr->prstate = PR_FREE; /* suicide	*/
 		resched();
 
 	case PR_SLEEP:
@@ -44,12 +47,12 @@ syscall	kill(
 
 	case PR_WAIT:
 		semtab[prptr->prsem].scount++;
-		/* fall through */
 
+		/* fall through	*/
 	case PR_READY:
-		getitem(pid);		/* remove from queue */
-		/* fall through */
+		getitem(pid); /* remove from queue	*/
 
+		/* fall through	*/
 	default:
 		prptr->prstate = PR_FREE;
 	}

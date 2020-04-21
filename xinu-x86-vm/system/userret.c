@@ -6,7 +6,7 @@
  *  userret  -  Called when a process returns from the top-level function
  *------------------------------------------------------------------------
  */
-void	userret(void)
+void userret(void)
 {
-	kill(getpid());			/* force process exit */
+	kill(getpid()); /* force process exit */
 }
