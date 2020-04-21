@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 // function/process declaration.
-void number_waiter();
-void sentance_signaler();
-void number_others();
-void sentance_others();
+void number_waiter(int32);
+void sentance_signaler(int32, int32);
+void number_others(int32);
+void sentance_others(int32);
 
 // global values to work with.
 int32 g_counter = 0;
@@ -36,11 +36,11 @@ int main(int argc, char const *argv[])
 
 	g_sid_semaphore = semcreate(_COUNTER_FIRST - 1);
 
-	g_pid_number = create(number_waiter, 1024, 11, "print numbers waiter", 0);
-	g_pid_sentance = create(sentance_signaler, 1024, 10, "print sentance signaler", 0);
+	g_pid_number = create(number_waiter, 1024, 11, "print numbers waiter", 1, _COUNTER_MAX);
+	g_pid_sentance = create(sentance_signaler, 1024, 10, "print sentance signaler", 2, _COUNTER_MAX, _COUNTER_NEXT);
 
-	// g_pid_number = create(number_others, 1024, 11, "print numbers other", 0);
-	// g_pid_sentance = create(sentance_others, 1024, 10, "print sentance other", 0);
+	// g_pid_number = create(number_others, 1024, 11, "print numbers other", 1, _COUNTER_MAX);
+	// g_pid_sentance = create(sentance_others, 1024, 10, "print sentance other", 1, _COUNTER_NEXT);
 
 	resume(g_pid_number);
 	resume(g_pid_sentance);
@@ -56,9 +56,11 @@ int main(int argc, char const *argv[])
  *  number_waiter - based of the instructions in the lab.
  *------------------------------------------------------------------------
  */
-void number_waiter()
+void number_waiter(
+	int32 max_count /* This is the max value that the counter will go to. */
+)
 {
-	for (g_counter = 1; g_counter <= _COUNTER_MAX; ++g_counter)
+	for (g_counter = 1; g_counter <= max_count; ++g_counter)
 	{
 		kprintf("%d ", g_counter);
 		wait(g_sid_semaphore);
@@ -69,13 +71,16 @@ void number_waiter()
  *  sentance_signaler - based of the instructions in the lab.
  *------------------------------------------------------------------------
  */
-void sentance_signaler()
+void sentance_signaler(
+	int32 max_count, /* This is the max value that the counter will go to. */
+	int32 num_count	 /* This is the number of times the numbers should print after initial set. */
+)
 {
 	do
 	{
 		kprintf("Team 4 Rocks! v.A\n");
-		signaln(g_sid_semaphore, _COUNTER_NEXT);
-	} while (g_counter <= _COUNTER_MAX);
+		signaln(g_sid_semaphore, num_count);
+	} while (g_counter <= max_count);
 }
 
 /* *********** *********** ********** ********** *********** *********** *
@@ -86,9 +91,11 @@ void sentance_signaler()
  *  number_others - based on what others did in the group.
  *------------------------------------------------------------------------
  */
-void number_others()
+void number_others(
+	int32 max_count /* This is the max value that the counter will go to. */
+)
 {
-	for (g_counter = 1; g_counter <= _COUNTER_MAX; ++g_counter)
+	for (g_counter = 1; g_counter <= max_count; ++g_counter)
 	{
 		kprintf("%d ", g_counter);
 		wait(g_sid_semaphore);
@@ -100,11 +107,13 @@ void number_others()
  *  sentance_others - based on what others did in the group.
  *------------------------------------------------------------------------
  */
-void sentance_others()
+void sentance_others(
+	int32 num_count /* This is the number of times the numbers should print after initial set. */
+)
 {
 	while (TRUE)
 	{
 		kprintf("Team 4 Rocks! v.D\n");
-		signaln(g_sid_semaphore, _COUNTER_NEXT);
+		signaln(g_sid_semaphore, num_count);
 	}
 }
