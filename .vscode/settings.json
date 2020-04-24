@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "xinu.h": "c",
+        "shprototypes.h": "c",
+        "shell.h": "c"
+    }
+}

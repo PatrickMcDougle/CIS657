@@ -12,9 +12,10 @@ shellcmd xsh_clear(int nargs, char *args[])
 
     /* Insure no arguments were passed */
 
-    if (nargs > 1) {
-	fprintf(stderr,"use is: %s\n", args[0]);
-	return 1;
+    if (nargs > 1)
+    {
+        fprintf(stderr, "use is: %s\n", args[0]);
+        return 1;
     }
 
     printf("\033[2J\033[H\n");
