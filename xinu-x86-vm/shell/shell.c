@@ -66,19 +66,19 @@ process shell(
 								/*   names that follow > and <		*/
 	did32 stdinput, stdoutput;	/* descriptors for redirected		*/
 								/*   input and output				*/
-	int32 i;   /* index into array of tokens	*/
-	int32 j;   /* index into array of commands	*/
-	int32 msg; /* message from receive() for	*/
-	/*   child termination		*/
-	int32 tmparg; /* address of this var is used	*/
-	/*   when first creating child	*/
-	/*   process, but is replaced	*/
-	char *src, *cmp; /* ptrs using during name	*/
-	/*   comparison			*/
-	bool8 diff; /* was difference found during	*/
-	/*   comparison			*/
-	char *args[SHELL_MAXTOK]; /* argument vector passed to	*/
-	/*   builtin commands		*/
+	int32 i;					/* index into array of tokens		*/
+	int32 j;					/* index into array of commands		*/
+	int32 msg;					/* message from receive() for		*/
+								/*   child termination				*/
+	int32 tmparg;				/* address of this var is used		*/
+								/*   when first creating child		*/
+								/*   process, but is replaced		*/
+	char *src, *cmp;			/* ptrs using during name			*/
+								/*   comparison						*/
+	bool8 diff;					/* was difference found during		*/
+								/*   comparison						*/
+	char *args[SHELL_MAXTOK];	/* argument vector passed to		*/
+								/*   builtin commands				*/
 
 	/* Print shell banner and startup message */
 
