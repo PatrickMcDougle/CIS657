@@ -13,15 +13,15 @@
 
 /* Shell banner (assumes VT100) */
 
-#define SHELL_BAN0 "\033[1;31m"
-#define SHELL_BAN1 "------------------------------------------"
-#define SHELL_BAN2 "   __    __   _____    _   _    _    _    "
-#define SHELL_BAN3 "   \\ \\  / /  |__ __|  | \\ | |  | |  | |   "
-#define SHELL_BAN4 "    \\ \\/ /     | |    |  \\| |  | |  | |   "
-#define SHELL_BAN5 "    / /\\ \\    _| |_   | \\   |  | |  | |   "
-#define SHELL_BAN6 "   / /  \\ \\  |     |  | | \\ |  \\  --  /   "
-#define SHELL_BAN7 "   --    --   -----    -   -     ----     "
-#define SHELL_BAN8 "------------------------------------------"
+#define SHELL_BAN0 "\033[1;33m"
+#define SHELL_BAN1 "-------------------------------------------------------------"
+#define SHELL_BAN2 "    ___________  _______     ___       ___  ___      _  _    "
+#define SHELL_BAN3 "   |           ||   ____|   /   \\     |   \\/   |    | || |   "
+#define SHELL_BAN4 "    ---|  |---- |  |__     /  ^  \\    |  \\  /  |    | || |_  "
+#define SHELL_BAN5 "       |  |     |   __|   /  /_\\  \\   |  |\\/|  |    |__   _| "
+#define SHELL_BAN6 "       |  |     |  |____ /  _____  \\  |  |  |  |       | |   "
+#define SHELL_BAN7 "       |__|     |_______/__/     \\__\\ |__|  |__|       |_|   "
+#define SHELL_BAN8 "-------------------------------------------------------------"
 #define SHELL_BAN9 "\033[0;39m\n"
 
 /* Messages shell displays for user */
