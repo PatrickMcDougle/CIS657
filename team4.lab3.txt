@@ -1,0 +1,49 @@
+lab3
+pxsh $ riority & pid: [20,4]
+
+xsh $ 
+xsh $ 
+xsh $ lab3 30
+Priority updated: [30]
+priority & pid: [30,6]
+xsh $ 
+xsh $ 
+xsh $ 
+xsh $ lab3 10
+Priority updated: [10]
+xsh $ priority & pid: [10,8]
+
+xsh $ 
+xsh $ 
+xsh $ lab3 222
+Priority updated: [222]
+lab3: Incorrect argument - value needs to be in the range of 1 to 127 inclusive.
+Try 'lab3 --help' for more information
+xsh $ 
+xsh $ 
+xsh $ 
+xsh $ lab3 22 22
+lab3: Incorrect number of arguments
+Try 'lab3 --help' for more information
+xsh $ 
+xsh $ 
+xsh $ 
+xsh $ lab3 -12
+lab3: Incorrect argument - value is not a postive number
+Try 'lab3 --help' for more information
+xsh $ 
+xsh $ 
+xsh $ 
+xsh $ lab3 --help
+Usage: lab3 <priority>
+
+Description:
+	Starts a new process that runs forever with the given priority.
+Options:
+	<priority>	The priority value to use when creating the forever
+			process.  Valid values are in the range: 1 to 127.
+			Default value is 20.
+	--help    	Display this help and exit
+xsh $ 
+xsh $ 
+xsh $ 

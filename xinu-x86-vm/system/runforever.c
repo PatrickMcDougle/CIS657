@@ -11,7 +11,7 @@ void runforever(
 {
     printf("priority & pid: [%d,%d]\n", priority, getpid());
 
-    // while (TRUE)
+    while (TRUE)
     {
         // do nothing at this time.
     }
