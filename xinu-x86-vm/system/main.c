@@ -12,12 +12,17 @@ int main(int argc, char **argv)
 	/* Wait for shell to exit and recreate it */
 
 	recvclr();
-	while (TRUE) {
+	while (TRUE)
+	{
 		retval = receive();
 		kprintf("\n\n\rMain process recreating shell\n\n\r");
 		resume(create(shell, 4096, 1, "shell", 1, CONSOLE));
 	}
-	while (1);
+	
+	while (1)
+	{
+		// do nothing, run forever.
+	}
 
 	return OK;
 }
