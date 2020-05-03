@@ -19,7 +19,9 @@ int main(int argc, char **argv)
 		resume(create(shell, 4096, 1, "shell", 1, CONSOLE));
 	}
 	while (TRUE)
-		;
+	{
+		// do nothing, run forever.
+	}
 
 	return OK;
 }
