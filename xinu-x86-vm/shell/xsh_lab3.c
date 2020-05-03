@@ -34,7 +34,7 @@ shellcmd xsh_lab3(int32 nargs, char *args[])
             // going to assume the input is an integer.
             priority = atoi(args[1]);
 
-            printf("Priority updated: [%d]\n", priority);
+            // printf("Priority updated: [%d]\n", priority);
 
             // check to make sure the priority is valid.
             if (priority < 1 || priority > 127)
