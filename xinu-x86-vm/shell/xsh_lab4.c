@@ -10,16 +10,16 @@
  */
 shellcmd xsh_lab4(int nargs, char *args[])
 {
-	int32	i;			/* walks through args array	*/
+    sid32 partnerAsSID;
+    sid32 partnerBsSID;
 
-	if (nargs > 1) {
-		printf("%s", args[1]);
+    partnerAsSID = semcreate(1);
+    partnerBsSID = semcreate(0);
 
-		for (i = 2; i < nargs; i++) {
-			printf(" %s", args[i]);
-		}
-	}
-	printf("\n");
+    resume(create(a, 1024, 12, "lab4 A", 2, partnerAsSID, partnerBsSID));
+    resume(create(b, 1024, 11, "lab4 B", 2, partnerBsSID, partnerAsSID));
 
-	return 0;
+    printf("\n");
+
+    return SHELL_OK;
 }

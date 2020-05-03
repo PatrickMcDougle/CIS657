@@ -118,10 +118,10 @@ extern devcall ionull(void);
 extern syscall kill(pid32);
 
 /* in file lab4_a.c */
-extern syscall a(sid32);
+extern syscall a(sid32, sid32);
 
 /* in file lab4_b.c */
-extern syscall b(sid32);
+extern syscall b(sid32, sid32);
 
 /* in file lexan.c */
 extern int32 lexan(char *, int32, char *, int32 *, int32[], int32[]);

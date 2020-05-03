@@ -7,21 +7,15 @@
  *------------------------------------------------------------------------
  */
 syscall a(
-    sid32 semaphoreID /* ID of the semaphore between processes */
+    sid32 mySID,     /* ID of the semaphore between processes */
+    sid32 partnerSID /* ID of the semaphore between processes */
 )
 {
-    intmask mask;          /* saved interrupt mask		*/
-    struct dentry *devptr; /* entry in device switch table	*/
-    int32 retval;          /* value to return to caller	*/
 
-    mask = disable();
-    if (isbaddev(descrp))
-    {
-        restore(mask);
-        return SYSERR;
-    }
-    devptr = (struct dentry *)&devtab[descrp];
-    retval = (*devptr->dvopen)(devptr, name, mode);
-    restore(mask);
-    return retval;
+    kprintf("My first statement appears before Bob's second statement.\n");
+    signal(mySID);
+    wait(partnerSID);
+    kprintf("This is Alice's second statement.\n");
+
+    return OK;
 }
