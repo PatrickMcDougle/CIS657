@@ -10,16 +10,19 @@
  */
 shellcmd xsh_lab4(int nargs, char *args[])
 {
-    sid32 partnerAsSID;
-    sid32 partnerBsSID;
+	sid32 partnerAsSID;
+	sid32 partnerBsSID;
 
-    partnerAsSID = semcreate(1);
-    partnerBsSID = semcreate(0);
+	partnerAsSID = semcreate(0);
+	partnerBsSID = semcreate(0);
 
-    resume(create(a, 1024, 12, "lab4 A", 2, partnerAsSID, partnerBsSID));
-    resume(create(b, 1024, 11, "lab4 B", 2, partnerBsSID, partnerAsSID));
+	pid32 aPID = create(a, 1024, 100, "lab4 A", 2, partnerAsSID, partnerBsSID);
+	pid32 bPID = create(b, 1024, 101, "lab4 B", 2, partnerBsSID, partnerAsSID);
 
-    printf("\n");
+	resume(bPID);
+	resume(aPID);
 
-    return SHELL_OK;
+	printf("\n");
+
+	return SHELL_OK;
 }
