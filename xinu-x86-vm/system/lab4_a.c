@@ -11,8 +11,6 @@ syscall a(
 	sid32 partnerSID /* ID of the semaphore between processes */
 )
 {
-
-	// wait(mySID);
 	kprintf("A1 - My first statement appears before Bob's second statement.\n");
 	signal(mySID);
 	wait(partnerSID);

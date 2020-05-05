@@ -7,12 +7,10 @@
  *------------------------------------------------------------------------
  */
 syscall b(
-	sid32 mySID,     /* ID of the semaphore between processes */
+	sid32 mySID,	 /* ID of the semaphore between processes */
 	sid32 partnerSID /* ID of the semaphore between processes */
 )
 {
-
-	// wait(mySID);
 	kprintf("B1 - My first statement appears before Alice's second statement.\n");
 	signal(mySID);
 	wait(partnerSID);
