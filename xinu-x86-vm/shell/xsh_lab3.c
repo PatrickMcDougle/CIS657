@@ -100,3 +100,40 @@ bool8 is_positive_integer(const char *pStr)
     // this string is a valid number.
     return TRUE;
 }
+
+
+int lacture5_brakeout(int32 nargs, char *args[])
+{
+    pri16 priority = 20;
+
+    int32 nprocess = 3;
+    if (nargs > 1)
+    {
+        nprocess = atoi(args[1]);
+    }
+
+    //      lab3 1
+    //args   0   1
+    //nargs 2
+
+    // printf("number: %d", nprocess);
+    // printf("number: %d", nargs);
+
+    int32 i;
+    for (i = 0; i < nprocess; ++i)
+    {
+        if (nargs > i + 2)
+        {
+            priority = atoi(args[i + 2]);
+        }
+        else
+        {
+            priority = 20;
+        }
+
+        pid32 pid_runforever = create(runforever, 1024, priority, "runforever", 1, priority);
+        resume(pid_runforever);
+    }
+
+    return 0;
+}
