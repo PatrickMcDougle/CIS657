@@ -11,7 +11,7 @@ bool8 is_positive_integer(const char *);
  */
 shellcmd xsh_lab3(int32 nargs, char *args[])
 {
-    pri16 priority = 20;
+    pri16 priority = INITPRIO;
 
     // Output info for '--help' argument
     if (nargs == 2)
