@@ -21,12 +21,19 @@ shellcmd xsh_lock(int nargs, char *args[])
     {
         printf("Usage: %s [-u] [-l [-c] [-C] [-n] [-w] [-s]] \n\n", args[0]);
         printf("Description:\n");
-        printf("\tterminates a process\n");
+        printf("\tEncrypts the system.  Echo and print are all encrypted.\n");
         printf("Options:\n");
-        printf("\tPID \tthe ID of a process to terminate\n");
-        printf("\t--help\tdisplay this help and exit\n");
+        printf("\t-u \tUnlock: \tTurns off the encryption.\n");
+        printf("\t-l \tLock: \t\tTurns on the encryption.  Need one other flag.\n");
+        printf("\t-c \tLower Case: \tEncrypt lower case characters.\n");
+        printf("\t-C \tUpper Case: \tEncrypt upper case characters.\n");
+        printf("\t-n \tNumbers: \tEncrypt number characters.\n");
+        printf("\t-w \tWhite Space: \tEncrypt white space, like newline, tab, space.\n");
+        printf("\t-s \tSymbols: \tEncrypt symbols found on the keyboard.\n");
+        printf("\t--help \t\tDisplay this help and exit\n");
         return OK;
     }
+
 
     /* Check argument count */
 
@@ -40,33 +47,5 @@ shellcmd xsh_lock(int nargs, char *args[])
 
     /* compute process ID from argument string */
 
-    chptr = args[1];
-    ch = *chptr++;
-    pid = 0;
-    while (ch != NULLCH)
-    {
-        if ((ch < '0') || (ch > '9'))
-        {
-            fprintf(stderr, "%s: non-digit in process ID\n",
-                    args[0]);
-            return 1;
-        }
-        pid = 10 * pid + (ch - '0');
-        ch = *chptr++;
-    }
-    if (pid == 0)
-    {
-        fprintf(stderr, "%s: cannot kill the null process\n",
-                args[0]);
-        return 1;
-    }
-
-    retval = kill(pid);
-    if (retval == SYSERR)
-    {
-        fprintf(stderr, "%s: cannot kill process %d\n",
-                args[0], pid);
-        return 1;
-    }
     return 0;
 }
