@@ -20,3 +20,4 @@
 #include <prototypes.h>
 #include <i386.h>
 #include <pci.h>
+#include <xsh_lock.h>

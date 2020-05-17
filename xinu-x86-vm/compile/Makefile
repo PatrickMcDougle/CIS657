@@ -4,19 +4,19 @@
 
 COMPILER_ROOT = /usr/bin/
 
-CC 	=	${COMPILER_ROOT}gcc
-cPP	=	${COMPILER_ROOT}gcc -E
-AS  	=	${COMPILER_ROOT}as --32
-LD	=	${COMPILER_ROOT}ld
+CC 		=	${COMPILER_ROOT}gcc
+cPP		=	${COMPILER_ROOT}gcc -E
+AS		=	${COMPILER_ROOT}as --32
+LD		=	${COMPILER_ROOT}ld
 OBJCOPY	=	${COMPILER_ROOT}objcopy
-LIB	= 	../lib/libxc
+LIB		= 	../lib/libxc
 XINU	=	./xinu
 
-MAKEDEP	= gcc -M -MG
+MAKEDEP	=	gcc -M -MG
 
-DEFS	= -DBSDURG
+DEFS	=	-DBSDURG
 CFLAGS_EXTRA =
-INCLUDE = -I../include
+INCLUDE =	-I../include
 
 # Amount to move loaded image down in memory
 
@@ -24,8 +24,8 @@ BRELOC  =	0x150000
 BOOTPLOC=	0x150000
 
 # Compiler flags
-SDEFS	= -I../include
-CFLAGS	= -march=i586 -m32 -fno-builtin -fno-stack-protector -nostdlib -c -Wall -O ${DEFS} ${INCLUDE} ${CFLAGS_EXTRA}
+SDEFS	=	-I../include
+CFLAGS	=	-march=i586 -m32 -fno-builtin -fno-stack-protector -nostdlib -c -Wall -O ${DEFS} ${INCLUDE} ${CFLAGS_EXTRA}
 
 # Loader flags
 
@@ -35,8 +35,8 @@ TOPDIR	= ..
 
 # Components (files for each are listed below) 
 
-COMPS	=	system 							\
-		device/tty						\
+COMPS	=	system	\
+		device/tty	\
 		shell 							
 
 # Start with empty source file list and add files for each directory
@@ -45,28 +45,28 @@ COMPS	=	system 							\
 SRC_FILES =
 
 #------------------------------------------------------------------------
-# Files for ../system							#
+# Files for ../system
 #------------------------------------------------------------------------
 
-SYSTEM_SFILES =								\
+SYSTEM_SFILES =	\
 	start.S		ctxsw.S		clkint.S	intr.S
 
-SYSTEM_CFILES =								\
-	ascdate.c	bufinit.c	chprio.c	panic.c		\
-	clkinit.c	close.c		conf.c		control.c	\
-	create.c	freebuf.c	freemem.c	getbuf.c	\
-	getc.c		getdev.c	getitem.c	getmem.c	\
-	getpid.c	getprio.c 	getstk.c	initialize.c 	\
-	i386.c		insert.c	insertd.c	ioerr.c		\
-	ionull.c	kill.c		kprintf.c	main.c		\
-	mkbufpool.c	newqueue.c	open.c		pci.c		\
-	putc.c		queue.c		read.c		ready.c		\
-	receive.c	recvclr.c	recvtime.c	resched.c	\
-	resume.c	sched_cntl.c 	seek.c		semcount.c	\
-	semcreate.c	semdelete.c	semreset.c	send.c		\
-	signal.c	signaln.c	sleep.c		suspend.c	\
-	unsleep.c	userret.c	wait.c		wakeup.c	\
-	write.c		xdone.c		yield.c		evec.c
+SYSTEM_CFILES =	\
+	ascdate.c	bufinit.c		chprio.c	panic.c			\
+	clkinit.c	close.c			conf.c		control.c		\
+	create.c	freebuf.c		freemem.c	getbuf.c		\
+	getc.c		getdev.c		getitem.c	getmem.c		\
+	getpid.c	getprio.c 		getstk.c	initialize.c 	\
+	i386.c		insert.c		insertd.c	ioerr.c			\
+	ionull.c	kill.c			kprintf.c	main.c			\
+	mkbufpool.c	newqueue.c		open.c		pci.c			\
+	putc.c		queue.c			read.c		ready.c			\
+	receive.c	recvclr.c		recvtime.c	resched.c		\
+	resume.c	sched_cntl.c 	seek.c		semcount.c		\
+	semcreate.c	semdelete.c		semreset.c	send.c			\
+	signal.c	signaln.c		sleep.c		suspend.c		\
+	unsleep.c	userret.c		wait.c		wakeup.c		\
+	write.c		xdone.c			yield.c		evec.c
 
 SYSTEM_SFULL = ${SYSTEM_SFILES:%=../system/%}
 SYSTEM_CFULL = ${SYSTEM_CFILES:%=../system/%}
@@ -75,17 +75,17 @@ SRC_FILES += $(SYSTEM_SFULL)
 SRC_FILES += $(SYSTEM_CFULL)
 
 #------------------------------------------------------------------------
-# Files for ../device/tty						#
+# Files for ../device/tty
 #------------------------------------------------------------------------
 
-TTY_SFILES =								\
+TTY_SFILES =	\
 	ttyDispatch.S
 
 
-TTY_CFILES =								\
-	ttyControl.c	ttyGetc.c	ttyInit.c	ttyInter_in.c	\
-	ttyInter_out.c	ttyInterrupt.c	ttyKickOut.c	ttyPutc.c	\
-	ttyRead.c	ttyWrite.c
+TTY_CFILES =	\
+	ttyControl.c	ttyGetc.c		ttyInit.c		ttyInter_in.c	\
+	ttyInter_out.c	ttyInterrupt.c	ttyKickOut.c	ttyPutc.c		\
+	ttyRead.c		ttyWrite.c
 
 TTY_SFULL = ${TTY_SFILES:%=../device/tty/%}
 TTY_CFULL = ${TTY_CFILES:%=../device/tty/%}
@@ -114,8 +114,8 @@ SRC_FILES += $(SHELL_CFULL)
 # Generate a list of all object files
 #######################################
 
-OBJ_TMP	= $(patsubst %.c,%.o,$(SRC_FILES)) 	# substitute .c => .o
-OBJ_FILES  = $(patsubst %.S,%.o,$(OBJ_TMP)) 	# substitute .S => .o
+OBJ_TMP		= $(patsubst %.c,%.o,$(SRC_FILES)) 	# substitute .c => .o
+OBJ_FILES	= $(patsubst %.S,%.o,$(OBJ_TMP)) 	# substitute .S => .o
 
 
 # Export variables for recursive make calls (such as the library)
@@ -127,7 +127,7 @@ export
 
 all:	xinu
 
-xinu: 	Makefile ../config/Configuration xinu.mapfile configure 	\
+xinu: 	Makefile ../config/Configuration xinu.mapfile configure	\
 		$(OBJ_FILES) $(LIB)/libxc.a
 		@echo;echo Now Loading all object files to produce GRUB bootable xinu: 
 		@echo;echo ${OBJ_FILES} 
@@ -140,7 +140,7 @@ ${LIB}/libxc.a:
 
 objects: $(OBJ_FILES)
 
-configure: ../include/conf.h 	../system/conf.c	
+configure: ../include/conf.h ../system/conf.c	
 	
 ../include/conf.h ../system/conf.c: ../config/config ../config/Configuration
 	@echo making conf.h and conf.c
