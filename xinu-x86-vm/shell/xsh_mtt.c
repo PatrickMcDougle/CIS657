@@ -1,10 +1,14 @@
 /* xsh_mtt.c - xsh_mtt1, xsh_mtt2, xsh_mtt3 */
 
 #include <xinu.h>
+#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // function declarations:
-void runforever(int16);
+void run_forever(pri16);
+void run_forever_but_sleep_first(pri16, int32);
+void run_after_wait(pri16);
 bool8 is_positive_integer(const char *);
 
 /*------------------------------------------------------------------------
@@ -64,9 +68,9 @@ shellcmd xsh_mtt1(int nargs, char *args[])
 		return SYSERR;
 	}
 
-	pid32 pid_runforever = create(runforever, 1024, priority, "patrick", 1, priority);
+	pid32 pid_run_forever = create(run_forever, 1024, priority, "patrick-c", 1, priority);
 
-	resume(pid_runforever);
+	resume(pid_run_forever);
 
 	return 0;
 }
@@ -80,18 +84,58 @@ shellcmd xsh_mtt1(int nargs, char *args[])
  */
 shellcmd xsh_mtt2(int nargs, char *args[])
 {
-	int32 i; /* walks through args array	*/
+	pri16 priority = INITPRIO;
 
-	if (nargs > 1)
+	// Output info for '--help' argument
+	if (nargs == 2)
 	{
-		printf("%s", args[1]);
-
-		for (i = 2; i < nargs; i++)
+		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			printf(" %s", args[i]);
+			printf("Usage: %s <priority>\n\n", args[0]);
+			printf("Description:\n");
+			printf("\tStarts a new process that runs forever with the given priority.\n");
+			printf("Options:\n");
+			printf("\t<priority>\tThe priority value to use when creating the forever\n");
+			printf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			printf("\t\t\tDefault value is 20.\n");
+			printf("\t--help    \tDisplay this help and exit\n");
+			return OK;
+		}
+
+		if (is_positive_integer(args[1]) == TRUE)
+		{
+			// going to assume the input is an integer.
+			priority = atoi(args[1]);
+
+			// printf("Priority updated: [%d]\n", priority);
+
+			// check to make sure the priority is valid.
+			if (priority < 1 || priority > 127)
+			{
+				fprintf(stderr, "%s: Incorrect argument - value needs to be in the range of 1 to 127 inclusive.\n", args[0]);
+				fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+				return SYSERR;
+			}
+		}
+		else
+		{
+			fprintf(stderr, "%s: Incorrect argument - value is not a postive number\n", args[0]);
+			fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+			return SYSERR;
 		}
 	}
-	printf("\n");
+
+	// Check argument count
+	else if (nargs > 2)
+	{
+		fprintf(stderr, "%s: Incorrect number of arguments\n", args[0]);
+		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+		return SYSERR;
+	}
+
+	pid32 pid_run_forever = create(run_forever_but_sleep_first, 1024, priority, "patrick-s", 2, priority, 10);
+
+	resume(pid_run_forever);
 
 	return 0;
 }
@@ -235,14 +279,15 @@ shellcmd xsh_mtt6(int nargs, char *args[])
 ////////////////////////////////////////////////////////////////////
 // FOLLOWING CODE IS A COPY OF MY LAB3 VERSION OF THE CODE.
 // This is not the group's version of the code.
+// Also some code changes due to test and finding "bugs"
 ////////////////////////////////////////////////////////////////////
 
 /* ---------- ---------- ---------- ---------- ---------- ----------
- * runforever - shell command to do whatever you want it to do.
+ * run_forever - shell command to do whatever you want it to do.
  * ---------- ---------- ---------- ---------- ---------- ----------
  */
-void runforever(
-	int16 priority /* Priority value for this process */
+void run_forever(
+	pri16 priority /* Priority value for this process */
 )
 {
 	printf("priority & pid: [%d,%d]\n", priority, getpid());
@@ -290,4 +335,39 @@ bool8 is_positive_integer(const char *pStr)
 
 	// this string is a valid number.
 	return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////
+
+
+void run_forever_but_sleep_first(
+	pri16 priority, /* Priority value for this process */
+	int32 sleep_seconds /* how long to sleep in seconds. */
+)
+{
+	sleep(sleep_seconds);
+
+	printf("priority & pid: [%d,%d]\n", priority, getpid());
+
+	while (TRUE)
+	{
+		// do nothing at this time.
+	}
+}
+
+
+/* ---------- ---------- ---------- ---------- ---------- ----------
+ * run_forever - shell command to do whatever you want it to do.
+ * ---------- ---------- ---------- ---------- ---------- ----------
+ */
+void run_after_wait(
+	pri16 priority /* Priority value for this process */
+)
+{
+	printf("Wait priority & pid: [%d,%d]\n", priority, getpid());
+
+	while (TRUE)
+	{
+		// do nothing at this time.
+	}
 }
