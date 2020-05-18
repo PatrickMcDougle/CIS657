@@ -47,6 +47,9 @@ extern shellcmd xsh_memstat(int32, char *[]);
 extern shellcmd xsh_mtt1(int32, char *[]);
 extern shellcmd xsh_mtt2(int32, char *[]);
 extern shellcmd xsh_mtt3(int32, char *[]);
+extern shellcmd xsh_mtt4(int32, char *[]);
+extern shellcmd xsh_mtt5(int32, char *[]);
+extern shellcmd xsh_mtt6(int32, char *[]);
 
 /* in file xsh_nvram.c */
 extern shellcmd xsh_nvram(int32, char *[]);
