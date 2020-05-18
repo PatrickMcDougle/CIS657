@@ -5,6 +5,7 @@
 
 // function declarations:
 void runforever(int16);
+bool8 is_positive_integer(const char *);
 
 	/*------------------------------------------------------------------------
  * xsh_mtt1 - Creates a new process with a user specified priority 
@@ -231,6 +232,11 @@ shellcmd xsh_mtt6(int nargs, char *args[])
 	return 0;
 }
 
+////////////////////////////////////////////////////////////////////
+// FOLLOWING CODE IS A COPY OF MY LAB3 VERSION OF THE CODE.
+// This is not the group's version of the code.
+////////////////////////////////////////////////////////////////////
+
 /* ---------- ---------- ---------- ---------- ---------- ----------
  * runforever - shell command to do whatever you want it to do.
  * ---------- ---------- ---------- ---------- ---------- ----------
@@ -245,4 +251,44 @@ void runforever(
 	{
 		// do nothing at this time.
 	}
+}
+
+
+/* ---------- ---------- ---------- ---------- ---------- ----------
+ * is_positive_integer - checks the string to make sure it is a 
+ *   positive integer.
+ * ---------- ---------- ---------- ---------- ---------- ----------
+ */
+bool8 is_positive_integer(const char *pStr)
+{
+    if (pStr == NULL || *pStr == '\0')
+    {
+        return FALSE;
+    }
+
+    char c = *pStr;
+
+    // checking to see if the string starts with a +
+    if (c == '+')
+    {
+        // positive values are ok.
+        // move to the next character.
+        ++pStr;
+    }
+
+    while (*pStr)
+    {
+        c = *pStr;
+
+        // ASCII: '0' ... '9' values.  Anything outside that is not valid.
+        if (c < '0' || c > '9')
+        {
+            return FALSE;
+        }
+
+        ++pStr;
+    }
+
+    // this string is a valid number.
+    return TRUE;
 }
