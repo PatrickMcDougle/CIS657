@@ -410,5 +410,7 @@ void run_after_wait(
 
 	wait(semaphore);
 
+	printf("done waiting!\n");
+
 	// do nothing at this time.
 }
