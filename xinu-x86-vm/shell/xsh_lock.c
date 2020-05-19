@@ -60,22 +60,14 @@ shellcmd xsh_lock(int nargs, char *args[])
 	int32 j = 0;
 	int32 k = 0;
 
-	g_enigma_encrypt_char_count = 0;
-	g_enigma_rotor_count = 0;
-	for (i = 0; i < 10; ++i)
-	{
-		for (j = 0; j < 3; ++j)
-		{
-			g_enigma_rotor_settings[i][j] = -1;
-		}
-	}
-
 	for (count = 1; count < nargs; ++count)
 	{
 		chptr = args[count];
 		ch = *chptr++;
 		i = 0;
-		switch (args[count][0])
+
+		// check to see what the first char is.
+		switch (ch)
 		{
 		case '-':
 			ch = *chptr++;
@@ -105,6 +97,14 @@ shellcmd xsh_lock(int nargs, char *args[])
 					encrypt_symbols = FALSE;
 					encrypt_lock = TRUE;
 					g_enigma_encrypt_char_count = 0;
+					g_enigma_rotor_count = 0;
+					for (i = 0; i < 10; ++i)
+					{
+						g_enigma_rotor_settings[i].type = -1;
+						g_enigma_rotor_settings[i].shift = -1;
+						g_enigma_rotor_settings[i].start = -1;
+						g_enigma_rotor_settings[i].position = -1;
+					}
 					break;
 				case 'c':
 					encrypt_lower_char = TRUE;
@@ -127,6 +127,14 @@ shellcmd xsh_lock(int nargs, char *args[])
 					g_enigma_encrypt_char_count += 32;
 					break;
 
+				case 'i':
+
+					for (j = 0; j < g_enigma_rotor_count; ++j)
+					{
+						g_enigma_rotor_settings[j].position = g_enigma_rotor_settings[j].start;
+					}
+					break;
+
 				default:
 					break;
 				}
@@ -142,8 +150,22 @@ shellcmd xsh_lock(int nargs, char *args[])
 			{
 				if (ch == ',')
 				{
-					g_enigma_rotor_settings[g_enigma_rotor_count][i++] = setting;
+					switch (i)
+					{
+					case 0:
+						g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
+						break;
+					case 1:
+						g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
+						break;
+					case 2:
+						g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
+						break;
+					default:
+						break;
+					}
 					setting = 0;
+					++i;
 				}
 				else if ((ch >= '0') && (ch <= '9'))
 				{
@@ -153,22 +175,25 @@ shellcmd xsh_lock(int nargs, char *args[])
 			}
 			if (i == 2)
 			{
-				g_enigma_rotor_settings[g_enigma_rotor_count][2] = setting;
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
 				setting = 0;
 			}
 			else if (i == 1)
 			{
-				g_enigma_rotor_settings[g_enigma_rotor_count][1] = setting;
-				g_enigma_rotor_settings[g_enigma_rotor_count][2] = 0;
+				g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
 				setting = 0;
 			}
 			else if (i == 0)
 			{
-				g_enigma_rotor_settings[g_enigma_rotor_count][0] = setting;
-				g_enigma_rotor_settings[g_enigma_rotor_count][1] = 0;
-				g_enigma_rotor_settings[g_enigma_rotor_count][2] = 0;
+				g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
+				g_enigma_rotor_settings[g_enigma_rotor_count].shift = 0;
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
 				setting = 0;
 			}
+
+			// set rotor position to the starting position.
+			g_enigma_rotor_settings[g_enigma_rotor_count].position = g_enigma_rotor_settings[g_enigma_rotor_count].start;
 
 			++g_enigma_rotor_count;
 			break;
@@ -185,190 +210,192 @@ shellcmd xsh_lock(int nargs, char *args[])
 	printf("encrypt_unlock %d\n", encrypt_unlock);
 	printf("g_enigma_rotor_count %d\n", g_enigma_rotor_count);
 
-	for (i = 0; i < 10; ++i)
-	{
-		printf(" %d | ", i);
-		for (j = 0; j < 3; ++j)
-		{
-			printf(" %d ", g_enigma_rotor_settings[i][j]);
-		}
-		printf("\n");
-	}
-
-	// allocate memory for the rotor array.
-	g_enigma_encrypt_chars = getmem(g_enigma_encrypt_char_count * sizeof(char));
-	g_enigma_rotors = getmem(g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(char));
-
-	// setup Rotor values:  Translate rotor int value into char values.
-
-	i = 0;
-	if (i < g_enigma_encrypt_char_count && encrypt_numbers == TRUE)
-	{
-		for (k = 0; k < 10; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = '0' + k;
-		}
-		i += 10;
-	}
-	if (i < g_enigma_encrypt_char_count && encrypt_lower_char == TRUE)
-	{
-		for (k = 0; k < 26; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = 'a' + k;
-		}
-		i += 26;
-	}
-	if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
-	{
-		for (k = 0; k < 26; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = 'A' + k;
-		}
-		i += 26;
-	}
-	if (i < g_enigma_encrypt_char_count && encrypt_white_space == TRUE)
-	{
-		g_enigma_encrypt_chars[i] = ' ';
-		g_enigma_encrypt_chars[i + 1] = '\n';
-		g_enigma_encrypt_chars[i + 2] = '\t';
-		i += 3;
-	}
-	if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
-	{
-		for (k = 0; k < 15; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = '!' + k;
-		}
-		i += 15;
-		for (k = 0; k < 7; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = ':' + k;
-		}
-		i += 7;
-		for (k = 0; k < 6; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = '[' + k;
-		}
-		i += 6;
-		for (k = 0; k < 4; ++k)
-		{
-			g_enigma_encrypt_chars[i + k] = '{' + k;
-		}
-		i += 4;
-	}
-
-	// setup rotors based on input.
-	int32 t;
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{
-		switch (g_enigma_rotor_settings[i][0])
-		{
-		case 1:
-			// A = A + Mix
-			// B = B + Mix
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			/* code */
-			break;
-		case 2:
-			// A = Z + Mix
-			// B = Y + Mix
-			for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			/* code */
-			break;
-		case 3:
-			// A = B + Mix
-			// B = A + Mix
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
-			{
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
-			}
-			/* code */
-			break;
-		case 4:
-			for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
-			{
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
-			}
-			/* code */
-			break;
-		case 5:
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				k = (j + j + 1) % g_enigma_encrypt_char_count;
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-			}
-			/* code */
-			break;
-		case 6:
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				k = (j + j + j + 1) % g_enigma_encrypt_char_count;
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-			}
-			/* code */
-			break;
-		case 7:
-			for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				k = (j + j + 1) % g_enigma_encrypt_char_count;
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-			}
-			/* code */
-			break;
-		case 8:
-			for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-			{
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i][1]) % g_enigma_encrypt_char_count;
-			}
-			for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-			{
-				k = (j + j + j + 1) % g_enigma_encrypt_char_count;
-				t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-				g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-			}
-			/* code */
-			break;
+		printf(" %d | %d %d %d %d\n", i,
+			   g_enigma_rotor_settings[i].type,
+			   g_enigma_rotor_settings[i].shift,
+			   g_enigma_rotor_settings[i].start,
+			   g_enigma_rotor_settings[i].position);
+	}
 
-		default:
-			// no setup.
-			break;
+	if (encrypt_lock == TRUE)
+	{
+		// allocate memory for the rotor array.
+		g_enigma_encrypt_chars = getmem(g_enigma_encrypt_char_count * sizeof(char));
+		g_enigma_rotors = getmem(g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(char));
+
+		// setup Rotor values:  Translate rotor int value into char values.
+
+		i = 0;
+		if (i < g_enigma_encrypt_char_count && encrypt_numbers == TRUE)
+		{
+			for (k = 0; k < 10; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = '0' + k;
+			}
+			i += 10;
+		}
+		if (i < g_enigma_encrypt_char_count && encrypt_lower_char == TRUE)
+		{
+			for (k = 0; k < 26; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = 'a' + k;
+			}
+			i += 26;
+		}
+		if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
+		{
+			for (k = 0; k < 26; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = 'A' + k;
+			}
+			i += 26;
+		}
+		if (i < g_enigma_encrypt_char_count && encrypt_white_space == TRUE)
+		{
+			g_enigma_encrypt_chars[i] = ' ';
+			g_enigma_encrypt_chars[i + 1] = '\n';
+			g_enigma_encrypt_chars[i + 2] = '\t';
+			i += 3;
+		}
+		if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
+		{
+			for (k = 0; k < 15; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = '!' + k;
+			}
+			i += 15;
+			for (k = 0; k < 7; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = ':' + k;
+			}
+			i += 7;
+			for (k = 0; k < 6; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = '[' + k;
+			}
+			i += 6;
+			for (k = 0; k < 4; ++k)
+			{
+				g_enigma_encrypt_chars[i + k] = '{' + k;
+			}
+			i += 4;
+		}
+
+		// setup rotors based on input.
+		int32 t;
+		for (i = 0; i < g_enigma_rotor_count; ++i)
+		{
+			switch (g_enigma_rotor_settings[i].type)
+			{
+			case 1:
+				// A = A + Mix
+				// B = B + Mix
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				/* code */
+				break;
+			case 2:
+				// A = Z + Mix
+				// B = Y + Mix
+				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				/* code */
+				break;
+			case 3:
+				// A = B + Mix
+				// B = A + Mix
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
+				{
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
+				}
+				/* code */
+				break;
+			case 4:
+				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
+				{
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
+				}
+				/* code */
+				break;
+			case 5:
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					k = (j + j + 1) % g_enigma_encrypt_char_count;
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
+				}
+				/* code */
+				break;
+			case 6:
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					k = (j + j + j + 1) % g_enigma_encrypt_char_count;
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
+				}
+				/* code */
+				break;
+			case 7:
+				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					k = (j + j + 1) % g_enigma_encrypt_char_count;
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
+				}
+				/* code */
+				break;
+			case 8:
+				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+				{
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
+				}
+				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+				{
+					k = (j + j + j + 1) % g_enigma_encrypt_char_count;
+					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
+					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
+				}
+				/* code */
+				break;
+
+			default:
+				// no setup.
+				break;
+			}
 		}
 	}
 

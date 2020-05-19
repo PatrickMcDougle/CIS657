@@ -63,8 +63,19 @@ syscall encryptf(char *string)
 	int32 i_val = 0;
 	int32 i;
 	int32 j;
+
+	for (i = 0; i < g_enigma_rotor_count; ++i)
+	{
+		printf("B: %d | %d %d %d %d\n", i,
+			   g_enigma_rotor_settings[i].type,
+			   g_enigma_rotor_settings[i].shift,
+			   g_enigma_rotor_settings[i].start,
+			   g_enigma_rotor_settings[i].position);
+	}
+
 	while (ch != NULL)
 	{
+		// first find the char in the list to get it's place value.
 		i_val = 0;
 		while (g_enigma_encrypt_chars[i_val] != NULL && g_enigma_encrypt_chars[i_val] != ch)
 		{
@@ -74,21 +85,52 @@ syscall encryptf(char *string)
 		// TODO: @Patrick need to update this at some later time.
 		if (g_enigma_encrypt_chars[i_val] != ch)
 		{
-			kprintf("DID NOT FIND CHAR [%d/%d:%c!=%c]\n",i_val,g_enigma_encrypt_char_count, ch,g_enigma_encrypt_chars[i]);
+			kprintf("DID NOT FIND CHAR [%d/%d:%c!=%c]\n", i_val, g_enigma_encrypt_char_count, ch, g_enigma_encrypt_chars[i_val]);
 			return SYSERR;
 		}
+
 		val = i_val;
 		for (i = 0; i < g_enigma_rotor_count; ++i)
 		{
-			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + val];
+			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count];
 		}
 		for (i = g_enigma_rotor_count - 2; i >= 0; --i)
 		{
-			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + val];
+			val = (g_enigma_rotors[i * g_enigma_encrypt_char_count + val] + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count;
+		}
+
+		// all done encoding/decoding now to update rotor positions.
+		i = g_enigma_rotor_count - 1;
+		j = 1;
+		while (i >= 0)
+		{
+			if (j == 1)
+			{
+				g_enigma_rotor_settings[i].position = (g_enigma_rotor_settings[i].position + j) % g_enigma_encrypt_char_count;
+
+				if (g_enigma_rotor_settings[i].position == 0)
+				{
+					j = 1;
+				}
+				else
+				{
+					j = 0;
+				}
+			}
+			--i;
 		}
 
 		printf("%c", g_enigma_encrypt_chars[val]);
 		ch = *string++;
+	}
+
+	for (i = 0; i < g_enigma_rotor_count; ++i)
+	{
+		printf("D: %d | %d %d %d %d\n", i,
+			   g_enigma_rotor_settings[i].type,
+			   g_enigma_rotor_settings[i].shift,
+			   g_enigma_rotor_settings[i].start,
+			   g_enigma_rotor_settings[i].position);
 	}
 
 	return OK;
