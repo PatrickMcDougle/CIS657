@@ -8,7 +8,7 @@
 // function declarations:
 void run_forever(pri16);
 void run_forever_but_sleep_first(pri16, int32);
-void run_after_wait(pri16, sid32);
+syscall run_after_wait(pri16, sid32);
 bool8 is_positive_integer(const char *);
 
 /*------------------------------------------------------------------------
@@ -26,14 +26,14 @@ shellcmd xsh_mtt1(int nargs, char *args[])
 	{
 		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			printf("Usage: %s <priority>\n\n", args[0]);
-			printf("Description:\n");
-			printf("\tStarts a new process that runs forever with the given priority.\n");
-			printf("Options:\n");
-			printf("\t<priority>\tThe priority value to use when creating the forever\n");
-			printf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
-			printf("\t\t\tDefault value is 20.\n");
-			printf("\t--help    \tDisplay this help and exit\n");
+			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Description:\n");
+			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("Options:\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			kprintf("\t\t\tDefault value is 20.\n");
+			kprintf("\t--help    \tDisplay this help and exit\n");
 			return OK;
 		}
 
@@ -41,8 +41,6 @@ shellcmd xsh_mtt1(int nargs, char *args[])
 		{
 			// going to assume the input is an integer.
 			priority = atoi(args[1]);
-
-			// printf("Priority updated: [%d]\n", priority);
 
 			// check to make sure the priority is valid.
 			if (priority < 1 || priority > 127)
@@ -91,14 +89,14 @@ shellcmd xsh_mtt2(int nargs, char *args[])
 	{
 		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			printf("Usage: %s <priority>\n\n", args[0]);
-			printf("Description:\n");
-			printf("\tStarts a new process that runs forever with the given priority.\n");
-			printf("Options:\n");
-			printf("\t<priority>\tThe priority value to use when creating the forever\n");
-			printf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
-			printf("\t\t\tDefault value is 20.\n");
-			printf("\t--help    \tDisplay this help and exit\n");
+			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Description:\n");
+			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("Options:\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			kprintf("\t\t\tDefault value is 20.\n");
+			kprintf("\t--help    \tDisplay this help and exit\n");
 			return OK;
 		}
 
@@ -106,8 +104,6 @@ shellcmd xsh_mtt2(int nargs, char *args[])
 		{
 			// going to assume the input is an integer.
 			priority = atoi(args[1]);
-
-			// printf("Priority updated: [%d]\n", priority);
 
 			// check to make sure the priority is valid.
 			if (priority < 1 || priority > 127)
@@ -160,11 +156,11 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 
 	if (nargs == 2 && strncmp(args[1], "--help", 7) == 0)
 	{
-		printf("Use: %s\n\n", args[0]);
-		printf("Description:\n");
-		printf("\tDisplays information about running processes\n");
-		printf("Options:\n");
-		printf("\t--help\t display this help and exit\n");
+		kprintf("Use: %s\n\n", args[0]);
+		kprintf("Description:\n");
+		kprintf("\tDisplays information about running processes\n");
+		kprintf("Options:\n");
+		kprintf("\t--help\t display this help and exit\n");
 		return 0;
 	}
 
@@ -180,11 +176,11 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 
 	/* Print header for items from the process table */
 
-	printf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
+	kprintf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
 		   "Pid", "Name", "State", "Prio", "Ppid", "Stack Base",
 		   "Stack Ptr", "Stack Size");
 
-	printf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
+	kprintf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
 		   "---", "----------------", "-----", "----", "----",
 		   "----------", "----------", "----------");
 
@@ -198,7 +194,7 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 			/* skip everything except for ready state items	*/
 			continue;
 		}
-		printf("%3d %-16s %s %4d %4d 0x%08X 0x%08X %10d\n",
+		kprintf("%3d %-16s %s %4d %4d 0x%08X 0x%08X %10d\n",
 			   i, prptr->prname, pstate[(int)prptr->prstate],
 			   prptr->prprio, prptr->prparent, prptr->prstkbase,
 			   prptr->prstkptr, prptr->prstklen);
@@ -221,14 +217,14 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 	{
 		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			printf("Usage: %s <priority>\n\n", args[0]);
-			printf("Description:\n");
-			printf("\tStarts a new process that runs forever with the given priority.\n");
-			printf("Options:\n");
-			printf("\t<priority>\tThe priority value to use when creating the forever\n");
-			printf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
-			printf("\t\t\tDefault value is 20.\n");
-			printf("\t--help    \tDisplay this help and exit\n");
+			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Description:\n");
+			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("Options:\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			kprintf("\t\t\tDefault value is 20.\n");
+			kprintf("\t--help    \tDisplay this help and exit\n");
 			return OK;
 		}
 
@@ -236,8 +232,6 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 		{
 			// going to assume the input is an integer.
 			priority = atoi(args[1]);
-
-			// printf("Priority updated: [%d]\n", priority);
 
 			// check to make sure the priority is valid.
 			if (priority < 1 || priority > 127)
@@ -263,9 +257,9 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 		return SYSERR;
 	}
 	
-	sid32 semephore = semcreate(-1);
+	sid32 semaphoreID = semcreate(0);
 
-	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-w", 2, priority, semephore);
+	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-w", 2, priority, semaphoreID);
 
 	resume(pid_run_forever);
 
@@ -283,14 +277,14 @@ shellcmd xsh_mtt5(int nargs, char *args[])
 
 	if (nargs > 1)
 	{
-		printf("%s", args[1]);
+		kprintf("%s", args[1]);
 
 		for (i = 2; i < nargs; i++)
 		{
-			printf(" %s", args[i]);
+			kprintf(" %s", args[i]);
 		}
 	}
-	printf("\n");
+	kprintf("\n");
 
 	return 0;
 }
@@ -306,14 +300,14 @@ shellcmd xsh_mtt6(int nargs, char *args[])
 
 	if (nargs > 1)
 	{
-		printf("%s", args[1]);
+		kprintf("%s", args[1]);
 
 		for (i = 2; i < nargs; i++)
 		{
-			printf(" %s", args[i]);
+			kprintf(" %s", args[i]);
 		}
 	}
-	printf("\n");
+	kprintf("\n");
 
 	return 0;
 }
@@ -332,7 +326,7 @@ void run_forever(
 	pri16 priority /* Priority value for this process */
 )
 {
-	printf("create priority & pid: [%d,%d]\n", priority, getpid());
+	kprintf("create priority & pid: [%d,%d]\n", priority, getpid());
 
 	while (TRUE)
 	{
@@ -388,7 +382,7 @@ void run_forever_but_sleep_first(
 {
 	sleep(sleep_seconds);
 
-	printf("sleep priority & pid: [%d,%d]\n", priority, getpid());
+	kprintf("sleep priority & pid: [%d,%d]\n", priority, getpid());
 
 	while (TRUE)
 	{
@@ -402,15 +396,17 @@ void run_forever_but_sleep_first(
  *   moving on.
  * ---------- ---------- ---------- ---------- ---------- ----------
  */
-void run_after_wait(
+syscall run_after_wait(
 	pri16 priority, /* Priority value for this process */
-	sid32 semaphore)
+	sid32 semaphoreID)
 {
-	printf("wait priority & pid: [%d,%d]\n", priority, getpid());
+	kprintf("wait priority & pid: [%d,%d]\n", priority, getpid());
 
-	wait(semaphore);
+	wait(semaphoreID);
 
-	printf("done waiting!\n");
+	kprintf("done waiting!\n");
+
+	// signal(semaphoreID);
 
 	// do nothing at this time.
 }
