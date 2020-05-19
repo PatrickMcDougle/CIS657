@@ -11,6 +11,10 @@ void run_forever_but_sleep_first(pri16, int32);
 syscall run_after_wait(pri16, sid32);
 bool8 is_positive_integer(const char *);
 
+// global variables:
+sid32 g_semaphoreID;
+pid32 g_first_wait_process_id = -1;
+
 /*------------------------------------------------------------------------
  * xsh_mtt1 - Creates a new process with a user specified priority 
  *   (or default) that starts running in an empty infinite loop after
@@ -177,12 +181,12 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 	/* Print header for items from the process table */
 
 	kprintf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
-		   "Pid", "Name", "State", "Prio", "Ppid", "Stack Base",
-		   "Stack Ptr", "Stack Size");
+			"Pid", "Name", "State", "Prio", "Ppid", "Stack Base",
+			"Stack Ptr", "Stack Size");
 
 	kprintf("%3s %-16s %5s %4s %4s %10s %-10s %10s\n",
-		   "---", "----------------", "-----", "----", "----",
-		   "----------", "----------", "----------");
+			"---", "----------------", "-----", "----", "----",
+			"----------", "----------", "----------");
 
 	/* Output information for each process */
 
@@ -195,9 +199,9 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 			continue;
 		}
 		kprintf("%3d %-16s %s %4d %4d 0x%08X 0x%08X %10d\n",
-			   i, prptr->prname, pstate[(int)prptr->prstate],
-			   prptr->prprio, prptr->prparent, prptr->prstkbase,
-			   prptr->prstkptr, prptr->prstklen);
+				i, prptr->prname, pstate[(int)prptr->prstate],
+				prptr->prprio, prptr->prparent, prptr->prstkbase,
+				prptr->prstkptr, prptr->prstklen);
 	}
 	return 0;
 }
@@ -211,6 +215,7 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 shellcmd xsh_mtt4(int nargs, char *args[])
 {
 	pri16 priority = INITPRIO;
+	struct procent *prptr; /* pointer to proc. table entry */
 
 	// Output info for '--help' argument
 	if (nargs == 2)
@@ -256,10 +261,18 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
 		return SYSERR;
 	}
-	
+
 	sid32 semaphoreID = semcreate(0);
 
 	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-w", 2, priority, semaphoreID);
+
+	if (g_first_wait_process_id == -1)
+	{
+		g_first_wait_process_id = pid_run_forever;
+	}
+
+	prptr = &proctab[pid_run_forever];
+	prptr->prsem = semaphoreID;
 
 	resume(pid_run_forever);
 
@@ -273,18 +286,78 @@ shellcmd xsh_mtt4(int nargs, char *args[])
  */
 shellcmd xsh_mtt5(int nargs, char *args[])
 {
-	int32 i; /* walks through args array	*/
+	struct procent *prptr; /* pointer to proc. table entry */
+	int16 unwait_number_of_processes = 1;
+	int16 i;
 
-	if (nargs > 1)
+	// Output info for '--help' argument
+	if (nargs == 2)
 	{
-		kprintf("%s", args[1]);
-
-		for (i = 2; i < nargs; i++)
+		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			kprintf(" %s", args[i]);
+			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Description:\n");
+			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("Options:\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			kprintf("\t\t\tDefault value is 20.\n");
+			kprintf("\t--help    \tDisplay this help and exit\n");
+			return OK;
+		}
+
+		if (is_positive_integer(args[1]) == TRUE)
+		{
+			// going to assume the input is an integer.
+			unwait_number_of_processes = atoi(args[1]);
+
+			// check to make sure the unwait_number_of_processes is valid.
+			if (unwait_number_of_processes < 1 || unwait_number_of_processes > 127)
+			{
+				fprintf(stderr, "%s: Incorrect argument - value needs to be in the range of 1 to 127 inclusive.\n", args[0]);
+				fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+				return SYSERR;
+			}
+		}
+		else
+		{
+			fprintf(stderr, "%s: Incorrect argument - value is not a postive number\n", args[0]);
+			fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+			return SYSERR;
 		}
 	}
-	kprintf("\n");
+
+	// Check argument count
+	else
+	{
+		fprintf(stderr, "%s: Incorrect number of arguments\n", args[0]);
+		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+		return SYSERR;
+	}
+
+	kprintf(" unwaiting:: %d", unwait_number_of_processes);
+
+	prptr = &proctab[g_first_wait_process_id];
+
+	while (unwait_number_of_processes > 0)
+	{
+
+		for (i = 0; i < NPROC; i++)
+		{
+			prptr = &proctab[i];
+
+			if (prptr->prstate == PR_WAIT)
+			{
+				signal(prptr->prsem);
+				--unwait_number_of_processes;
+				break;
+			}
+		}
+		if (i == NPROC)
+		{
+			break;
+		}
+	}
 
 	return 0;
 }
@@ -296,18 +369,61 @@ shellcmd xsh_mtt5(int nargs, char *args[])
  */
 shellcmd xsh_mtt6(int nargs, char *args[])
 {
-	int32 i; /* walks through args array	*/
+	int16 resume_process_id;
+	int16 i;
 
-	if (nargs > 1)
+	intmask mask; /* saved interrupt mask		*/
+
+	// Output info for '--help' argument
+	if (nargs >= 2)
 	{
-		kprintf("%s", args[1]);
-
-		for (i = 2; i < nargs; i++)
+		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			kprintf(" %s", args[i]);
+			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Description:\n");
+			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("Options:\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
+			kprintf("\t\t\tDefault value is 20.\n");
+			kprintf("\t--help    \tDisplay this help and exit\n");
+			return OK;
 		}
+
+		mask = disable();
+		for (i = 1; i < nargs; ++i)
+		{
+			if (is_positive_integer(args[i]) == TRUE)
+			{
+				// going to assume the input is an integer.
+				resume_process_id = atoi(args[i]);
+				// check to make sure the unwait_number_of_processes is valid.
+				if (resume_process_id < 1 || resume_process_id > 127)
+				{
+					fprintf(stderr, "%s: Incorrect argument - value needs to be in the range of 1 to 127 inclusive.\n", args[0]);
+					fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+					return SYSERR;
+				}
+
+				resume(resume_process_id);
+			}
+			else
+			{
+				fprintf(stderr, "%s: Incorrect argument - value is not a postive number\n", args[0]);
+				fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+				return SYSERR;
+			}
+		}
+		restore(mask);
 	}
-	kprintf("\n");
+
+	// Check argument count
+	else
+	{
+		fprintf(stderr, "%s: Incorrect number of arguments\n", args[0]);
+		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
+		return SYSERR;
+	}
 
 	return 0;
 }
@@ -404,9 +520,9 @@ syscall run_after_wait(
 
 	wait(semaphoreID);
 
-	kprintf("done waiting!\n");
-
-	// signal(semaphoreID);
+	// kprintf("done waiting!\n");
 
 	// do nothing at this time.
+
+	return OK;
 }
