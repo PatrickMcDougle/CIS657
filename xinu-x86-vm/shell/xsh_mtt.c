@@ -8,7 +8,7 @@
 // function declarations:
 void run_forever(pri16);
 void run_forever_but_sleep_first(pri16, int32);
-void run_after_wait(pri16);
+void run_after_wait(pri16, sid32);
 bool8 is_positive_integer(const char *);
 
 /*------------------------------------------------------------------------
@@ -262,9 +262,10 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
 		return SYSERR;
 	}
-	sid32 = 
+	
+	sid32 semephore = semcreate(-1);
 
-	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-s", 2, priority, 10);
+	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-w", 2, priority, semephore);
 
 	resume(pid_run_forever);
 
@@ -331,7 +332,7 @@ void run_forever(
 	pri16 priority /* Priority value for this process */
 )
 {
-	printf("priority & pid: [%d,%d]\n", priority, getpid());
+	printf("create priority & pid: [%d,%d]\n", priority, getpid());
 
 	while (TRUE)
 	{
@@ -387,7 +388,7 @@ void run_forever_but_sleep_first(
 {
 	sleep(sleep_seconds);
 
-	printf("priority & pid: [%d,%d]\n", priority, getpid());
+	printf("sleep priority & pid: [%d,%d]\n", priority, getpid());
 
 	while (TRUE)
 	{
@@ -405,12 +406,9 @@ void run_after_wait(
 	pri16 priority, /* Priority value for this process */
 	sid32 semaphore)
 {
-	printf("Wait priority & pid: [%d,%d]\n", priority, getpid());
+	printf("wait priority & pid: [%d,%d]\n", priority, getpid());
 
 	wait(semaphore);
 
-	while (TRUE)
-	{
-		// do nothing at this time.
-	}
+	// do nothing at this time.
 }
