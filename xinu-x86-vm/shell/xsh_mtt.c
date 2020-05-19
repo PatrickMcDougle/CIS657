@@ -34,7 +34,7 @@ shellcmd xsh_mtt1(int nargs, char *args[])
 			kprintf("Description:\n");
 			kprintf("\tStarts a new process that runs forever with the given priority.\n");
 			kprintf("Options:\n");
-			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the process\n");
 			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
 			kprintf("\t\t\tDefault value is 20.\n");
 			kprintf("\t--help    \tDisplay this help and exit\n");
@@ -97,7 +97,7 @@ shellcmd xsh_mtt2(int nargs, char *args[])
 			kprintf("Description:\n");
 			kprintf("\tStarts a new process that runs forever with the given priority.\n");
 			kprintf("Options:\n");
-			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the process\n");
 			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
 			kprintf("\t\t\tDefault value is 20.\n");
 			kprintf("\t--help    \tDisplay this help and exit\n");
@@ -162,7 +162,7 @@ shellcmd xsh_mtt3(int nargs, char *args[])
 	{
 		kprintf("Use: %s\n\n", args[0]);
 		kprintf("Description:\n");
-		kprintf("\tDisplays information about running processes\n");
+		kprintf("\tDisplays information about READY only running processes\n");
 		kprintf("Options:\n");
 		kprintf("\t--help\t display this help and exit\n");
 		return 0;
@@ -224,9 +224,9 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 		{
 			kprintf("Usage: %s <priority>\n\n", args[0]);
 			kprintf("Description:\n");
-			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("\tStarts a new process that waits to finish running with the given priority.\n");
 			kprintf("Options:\n");
-			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t<priority>\tThe priority value to use when creating the process\n");
 			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
 			kprintf("\t\t\tDefault value is 20.\n");
 			kprintf("\t--help    \tDisplay this help and exit\n");
@@ -379,11 +379,11 @@ shellcmd xsh_mtt6(int nargs, char *args[])
 	{
 		if (strncmp(args[1], "--help", 7) == 0)
 		{
-			kprintf("Usage: %s <priority>\n\n", args[0]);
+			kprintf("Usage: %s <processID>+\n\n", args[0]);
 			kprintf("Description:\n");
-			kprintf("\tStarts a new process that runs forever with the given priority.\n");
+			kprintf("\tPuts all the processes that were passed in into resume state.\n");
 			kprintf("Options:\n");
-			kprintf("\t<priority>\tThe priority value to use when creating the forever\n");
+			kprintf("\t<priority>+\tThe priority value to use when creating the forever\n");
 			kprintf("\t\t\tprocess.  Valid values are in the range: 1 to 127.\n");
 			kprintf("\t\t\tDefault value is 20.\n");
 			kprintf("\t--help    \tDisplay this help and exit\n");
