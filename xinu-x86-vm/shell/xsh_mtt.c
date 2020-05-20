@@ -13,7 +13,7 @@ bool8 is_positive_integer(const char *);
 
 // global variables:
 sid32 g_semaphoreID;
-pid32 g_first_wait_process_id = -1;
+// pid32 g_first_wait_process_id = -1;
 
 /*------------------------------------------------------------------------
  * xsh_mtt1 - Creates a new process with a user specified priority 
@@ -266,10 +266,10 @@ shellcmd xsh_mtt4(int nargs, char *args[])
 
 	pid32 pid_run_forever = create(run_after_wait, 1024, priority, "patrick-w", 2, priority, semaphoreID);
 
-	if (g_first_wait_process_id == -1)
-	{
-		g_first_wait_process_id = pid_run_forever;
-	}
+	// if (g_first_wait_process_id == -1)
+	// {
+	// 	g_first_wait_process_id = pid_run_forever;
+	// }
 
 	prptr = &proctab[pid_run_forever];
 	prptr->prsem = semaphoreID;
@@ -337,7 +337,7 @@ shellcmd xsh_mtt5(int nargs, char *args[])
 
 	kprintf(" unwaiting:: %d", unwait_number_of_processes);
 
-	prptr = &proctab[g_first_wait_process_id];
+	// prptr = &proctab[g_first_wait_process_id];
 
 	while (unwait_number_of_processes > 0)
 	{
