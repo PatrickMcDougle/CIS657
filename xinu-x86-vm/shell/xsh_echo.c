@@ -37,7 +37,7 @@ shellcmd xsh_eecho(int nargs, char *args[])
 
 	if (g_enigma_rotors != NULL)
 	{
-		printf("Enigma Set: ");
+		printf("ENIGMA:\n");
 		for (i = 1; i < nargs; i++)
 		{
 			encryptf(args[i]);
@@ -66,12 +66,13 @@ syscall encryptf(char *string)
 
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{
-		printf("B: %d | %d %d %d %d\n", i,
+		printf(" [%d] %d %d %d %d", i,
 			   g_enigma_rotor_settings[i].type,
 			   g_enigma_rotor_settings[i].shift,
 			   g_enigma_rotor_settings[i].start,
 			   g_enigma_rotor_settings[i].position);
 	}
+	printf("\n");
 
 	while (ch != NULL)
 	{
@@ -81,6 +82,7 @@ syscall encryptf(char *string)
 		{
 			++i_val;
 		}
+		printf("\n [%c:%d] ", ch, i_val);
 
 		// TODO: @Patrick need to update this at some later time.
 		if (g_enigma_encrypt_chars[i_val] != ch)
@@ -92,12 +94,15 @@ syscall encryptf(char *string)
 		val = i_val;
 		for (i = 0; i < g_enigma_rotor_count; ++i)
 		{
-			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count];
+			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count].forword;
+			printf(" %d", val);
 		}
-		for (i = g_enigma_rotor_count - 2; i >= 0; --i)
+		for (i = g_enigma_rotor_count - 1; i >= 0; --i)
 		{
-			val = (g_enigma_rotors[i * g_enigma_encrypt_char_count + val] + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count;
+			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count].backward;
+			printf(" %d", val);
 		}
+		printf(" = ");
 
 		// all done encoding/decoding now to update rotor positions.
 		i = g_enigma_rotor_count - 1;
@@ -123,15 +128,17 @@ syscall encryptf(char *string)
 		printf("%c", g_enigma_encrypt_chars[val]);
 		ch = *string++;
 	}
+	printf("\n");
 
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{
-		printf("D: %d | %d %d %d %d\n", i,
+		printf(" [%d] %d %d %d %d", i,
 			   g_enigma_rotor_settings[i].type,
 			   g_enigma_rotor_settings[i].shift,
 			   g_enigma_rotor_settings[i].start,
 			   g_enigma_rotor_settings[i].position);
 	}
+	printf("\n");
 
 	return OK;
 }

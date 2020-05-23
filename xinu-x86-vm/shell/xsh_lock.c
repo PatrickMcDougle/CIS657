@@ -4,23 +4,28 @@
 #include <string.h>
 #include <stdio.h>
 
+bool16 parse_inputs(int, char *[]);
+void print_input_settings(bool16);
+void print_global_settings();
+void print_rotor_settings();
+void print_chars_to_encrypt();
+void print_rotor_setup();
+void rotor_setup_type_1(int16, int16);
+void rotor_setup_type_2(int16, int16);
+void rotor_setup_type_3(int16, int16);
+void rotor_setup_type_4(int16, int16);
+void rotor_setup_type_5(int16, int16);
+void rotor_setup_type_6(int16, int16);
+void rotor_setup_type_7(int16, int16);
+void rotor_setup_type_8(int16, int16);
+
 /*------------------------------------------------------------------------
  * xsh_lock - This command locks the system so that everything is encrypted.
  *------------------------------------------------------------------------
  */
 shellcmd xsh_lock(int nargs, char *args[])
 {
-
-	char ch;	 /* next character of argument	    */
-	char *chptr; /* walks along argument string	*/
-
-	bool8 encrypt_lower_char = FALSE;
-	bool8 encrypt_upper_char = FALSE;
-	bool8 encrypt_numbers = FALSE;
-	bool8 encrypt_white_space = FALSE;
-	bool8 encrypt_symbols = FALSE;
-	bool8 encrypt_lock = FALSE;
-	bool8 encrypt_unlock = FALSE;
+	bool16 encryptInputSettings = 0;
 
 	/* Check argument count */
 
@@ -35,17 +40,19 @@ shellcmd xsh_lock(int nargs, char *args[])
 
 	if (nargs == 2 && strncmp(args[1], "--help", 7) == 0)
 	{
-		printf("Usage: %s ([-u] | [-l [-c] [-C] [-n] [-w] [-s]]) <RS>+ \n\n", args[0]);
+		printf("Usage: %s (-u | -l [-c] [-C] [-n] [-w] [-s] [-i]) [-v] <RS>+ \n\n", args[0]);
 		printf("Description:\n");
 		printf("\tEncrypts the system.  Echo and print are all encrypted.\n");
 		printf("Options:\n");
-		printf("\t-u \tUnlock: \tTurns off the encryption.\n");
-		printf("\t-l \tLock: \t\tTurns on the encryption.  Need one other flag.\n");
 		printf("\t-c \tLower Case: \tEncrypt lower case characters.\n");
 		printf("\t-C \tUpper Case: \tEncrypt upper case characters.\n");
+		printf("\t-i \tReset: \tReset the rotor values to the inital start position.\n");
+		printf("\t-l \tLock: \t\tTurns on the encryption.  Need one other flag.\n");
 		printf("\t-n \tNumbers: \tEncrypt number characters.\n");
-		printf("\t-w \tWhite Space: \tEncrypt white space, like newline, tab, space.\n");
 		printf("\t-s \tSymbols: \tEncrypt symbols found on the keyboard.\n");
+		printf("\t-u \tUnlock: \tTurns off the encryption.\n");
+		printf("\t-v \tVerbose: \tTurns on verbose mode and print stuff to standard output.\n");
+		printf("\t-w \tWhite Space: \tEncrypt white space, like newline, tab, space.\n");
 		printf("\t<RS> \tRotorSettings: \t<Sch>,<Mix>,<Srt>. need at least one (1) set and no more then nine (9) sets.\n");
 		printf("\t<Sch> \tSchema: \tValue between 1-5.  This value defines the encryption schema of the Rotor.\n");
 		printf("\t<Mix> \tMixer:  \tValue between 0-255.  This value defines the Mix value for the schema.\n");
@@ -54,212 +61,79 @@ shellcmd xsh_lock(int nargs, char *args[])
 		return OK;
 	}
 
-	int32 count = 0;
-	int32 setting = 0;
-	int32 i = 0;
-	int32 j = 0;
-	int32 k = 0;
+	encryptInputSettings = parse_inputs(nargs, args);
 
-	for (count = 1; count < nargs; ++count)
+	if (shouldEncryptVerbose(encryptInputSettings))
 	{
-		chptr = args[count];
-		ch = *chptr++;
-		i = 0;
+		print_input_settings(encryptInputSettings);
+		print_rotor_settings();
+		print_global_settings();
+	}
 
-		// check to see what the first char is.
-		switch (ch)
+	int16 i = 0;
+	int16 j = 0;
+	int16 k = 0;
+	int32 rotor_set = 0;
+
+	if (shouldEncryptUnlock(encryptInputSettings))
+	{
+		if (g_enigma_rotors != NULL)
 		{
-		case '-':
-			ch = *chptr++;
-			while (ch != NULL)
-			{
-				switch (ch)
-				{
-				case 'u':
-					encrypt_lower_char = FALSE;
-					encrypt_upper_char = FALSE;
-					encrypt_numbers = FALSE;
-					encrypt_white_space = FALSE;
-					encrypt_symbols = FALSE;
-					encrypt_unlock = TRUE;
-					g_enigma_encrypt_char_count = 0;
-					if (g_enigma_rotors != NULL)
-					{
-						freemem(g_enigma_rotors, g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(char));
-						freemem(g_enigma_encrypt_chars, g_enigma_encrypt_char_count * sizeof(char));
-					}
-					break;
-				case 'l':
-					encrypt_lower_char = FALSE;
-					encrypt_upper_char = FALSE;
-					encrypt_numbers = FALSE;
-					encrypt_white_space = FALSE;
-					encrypt_symbols = FALSE;
-					encrypt_lock = TRUE;
-					g_enigma_encrypt_char_count = 0;
-					g_enigma_rotor_count = 0;
-					for (i = 0; i < 10; ++i)
-					{
-						g_enigma_rotor_settings[i].type = -1;
-						g_enigma_rotor_settings[i].shift = -1;
-						g_enigma_rotor_settings[i].start = -1;
-						g_enigma_rotor_settings[i].position = -1;
-					}
-					break;
-				case 'c':
-					encrypt_lower_char = TRUE;
-					g_enigma_encrypt_char_count += 26;
-					break;
-				case 'C':
-					encrypt_upper_char = TRUE;
-					g_enigma_encrypt_char_count += 26;
-					break;
-				case 'n':
-					encrypt_numbers = TRUE;
-					g_enigma_encrypt_char_count += 10;
-					break;
-				case 'w':
-					encrypt_white_space = TRUE;
-					g_enigma_encrypt_char_count += 3;
-					break;
-				case 's':
-					encrypt_symbols = TRUE;
-					g_enigma_encrypt_char_count += 32;
-					break;
+			freemem((char *)g_enigma_rotors, g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(struct rotor_vals));
+			freemem(g_enigma_encrypt_chars, g_enigma_encrypt_char_count * sizeof(char));
+		}
+		g_enigma_rotor_count = 0;
+		g_enigma_encrypt_char_count = 0;
+	}
 
-				case 'i':
-
-					for (j = 0; j < g_enigma_rotor_count; ++j)
-					{
-						g_enigma_rotor_settings[j].position = g_enigma_rotor_settings[j].start;
-					}
-					break;
-
-				default:
-					break;
-				}
-				ch = *chptr++;
-			}
-			/* code */
-			break;
-
-		default:
-			// assume the value is a tuplet value set.  3 ints divided by ','
-			// assume default value of 1 for the last two sets if not present.
-			while (ch != NULL && i < 3)
-			{
-				if (ch == ',')
-				{
-					switch (i)
-					{
-					case 0:
-						g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
-						break;
-					case 1:
-						g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
-						break;
-					case 2:
-						g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
-						break;
-					default:
-						break;
-					}
-					setting = 0;
-					++i;
-				}
-				else if ((ch >= '0') && (ch <= '9'))
-				{
-					setting = 10 * setting + (ch - '0');
-				}
-				ch = *chptr++;
-			}
-			if (i == 2)
-			{
-				g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
-				setting = 0;
-			}
-			else if (i == 1)
-			{
-				g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
-				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
-				setting = 0;
-			}
-			else if (i == 0)
-			{
-				g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
-				g_enigma_rotor_settings[g_enigma_rotor_count].shift = 0;
-				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
-				setting = 0;
-			}
-
-			// set rotor position to the starting position.
-			g_enigma_rotor_settings[g_enigma_rotor_count].position = g_enigma_rotor_settings[g_enigma_rotor_count].start;
-
-			++g_enigma_rotor_count;
-			break;
+	else if (shouldEncryptResetRotorsPositions(encryptInputSettings))
+	{
+		for (j = 0; j < g_enigma_rotor_count; ++j)
+		{
+			g_enigma_rotor_settings[j].position = g_enigma_rotor_settings[j].start;
 		}
 	}
 
-	printf("Values:\n");
-	printf("encrypt_lower_char %d\n", encrypt_lower_char);
-	printf("encrypt_upper_char %d\n", encrypt_upper_char);
-	printf("encrypt_numbers %d\n", encrypt_numbers);
-	printf("encrypt_white_space %d\n", encrypt_white_space);
-	printf("encrypt_symbols %d\n", encrypt_symbols);
-	printf("encrypt_lock %d\n", encrypt_lock);
-	printf("encrypt_unlock %d\n", encrypt_unlock);
-	printf("g_enigma_rotor_count %d\n", g_enigma_rotor_count);
-
-	for (i = 0; i < g_enigma_rotor_count; ++i)
-	{
-		printf(" %d | %d %d %d %d\n", i,
-			   g_enigma_rotor_settings[i].type,
-			   g_enigma_rotor_settings[i].shift,
-			   g_enigma_rotor_settings[i].start,
-			   g_enigma_rotor_settings[i].position);
-	}
-
-	if (encrypt_lock == TRUE)
+	else if (shouldEncryptLock(encryptInputSettings))
 	{
 		// allocate memory for the rotor array.
 		g_enigma_encrypt_chars = getmem(g_enigma_encrypt_char_count * sizeof(char));
-		g_enigma_rotors = getmem(g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(char));
+		g_enigma_rotors = (struct rotor_vals *)getmem(g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(struct rotor_vals));
 
 		// setup Rotor values:  Translate rotor int value into char values.
 
 		i = 0;
-		if (i < g_enigma_encrypt_char_count && encrypt_numbers == TRUE)
+		if (i < g_enigma_encrypt_char_count && shouldEncryptNumbers(encryptInputSettings))
 		{
-			for (k = 0; k < 10; ++k)
+			for (k = 0; k < NUM_NUMS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = '0' + k;
 			}
-			i += 10;
+			i += NUM_NUMS;
 		}
-		if (i < g_enigma_encrypt_char_count && encrypt_lower_char == TRUE)
+		if (i < g_enigma_encrypt_char_count && shouldEncryptLowerCase(encryptInputSettings))
 		{
-			for (k = 0; k < 26; ++k)
+			for (k = 0; k < NUM_CHARS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = 'a' + k;
 			}
-			i += 26;
+			i += NUM_CHARS;
 		}
-		if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
+		if (i < g_enigma_encrypt_char_count && shouldEncryptUpperCase(encryptInputSettings))
 		{
-			for (k = 0; k < 26; ++k)
+			for (k = 0; k < NUM_CHARS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = 'A' + k;
 			}
-			i += 26;
+			i += NUM_CHARS;
 		}
-		if (i < g_enigma_encrypt_char_count && encrypt_white_space == TRUE)
+		if (i < g_enigma_encrypt_char_count && shouldEncryptWhiteSpace(encryptInputSettings))
 		{
-			g_enigma_encrypt_chars[i] = ' ';
-			g_enigma_encrypt_chars[i + 1] = '\n';
-			g_enigma_encrypt_chars[i + 2] = '\t';
-			i += 3;
+			g_enigma_encrypt_chars[i++] = ' ';
+			g_enigma_encrypt_chars[i++] = '\n';
+			g_enigma_encrypt_chars[i++] = '\t';
 		}
-		if (i < g_enigma_encrypt_char_count && encrypt_upper_char == TRUE)
+		if (i < g_enigma_encrypt_char_count && shouldEncryptSymbols(encryptInputSettings))
 		{
 			for (k = 0; k < 15; ++k)
 			{
@@ -284,112 +158,34 @@ shellcmd xsh_lock(int nargs, char *args[])
 		}
 
 		// setup rotors based on input.
-		int32 t;
 		for (i = 0; i < g_enigma_rotor_count; ++i)
 		{
+			rotor_set = i * g_enigma_encrypt_char_count;
 			switch (g_enigma_rotor_settings[i].type)
 			{
 			case 1:
-				// A = A + Mix
-				// B = B + Mix
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				/* code */
+				rotor_setup_type_1(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 2:
-				// A = Z + Mix
-				// B = Y + Mix
-				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				/* code */
+				rotor_setup_type_2(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 3:
-				// A = B + Mix
-				// B = A + Mix
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
-				{
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
-				}
-				/* code */
+				rotor_setup_type_3(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 4:
-				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
-				{
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j + 1] = t;
-				}
-				/* code */
+				rotor_setup_type_4(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 5:
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					k = (j + j + 1) % g_enigma_encrypt_char_count;
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-				}
-				/* code */
+				rotor_setup_type_5(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 6:
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (j + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					k = (j + j + j + 1) % g_enigma_encrypt_char_count;
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-				}
-				/* code */
+				rotor_setup_type_6(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 7:
-				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					k = (j + j + 1) % g_enigma_encrypt_char_count;
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-				}
-				/* code */
+				rotor_setup_type_7(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 8:
-				for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
-				{
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = (k + g_enigma_rotor_settings[i].shift) % g_enigma_encrypt_char_count;
-				}
-				for (j = 0; j < g_enigma_encrypt_char_count; ++j)
-				{
-					k = (j + j + j + 1) % g_enigma_encrypt_char_count;
-					t = g_enigma_rotors[i * g_enigma_encrypt_char_count + j];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + j] = g_enigma_rotors[i * g_enigma_encrypt_char_count + k];
-					g_enigma_rotors[i * g_enigma_encrypt_char_count + k] = t;
-				}
-				/* code */
+				rotor_setup_type_8(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 
 			default:
@@ -399,31 +195,445 @@ shellcmd xsh_lock(int nargs, char *args[])
 		}
 	}
 
-	printf("ENCRYPT CHARS SETUP:");
-	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	if (shouldEncryptVerbose(encryptInputSettings))
 	{
-		if (j % 30 == 0)
-		{
-			printf("\n");
-		}
-		printf(" %c", g_enigma_encrypt_chars[j]);
+		print_chars_to_encrypt();
+		print_rotor_setup();
 	}
-	printf("\n");
+
+	return SHELL_OK;
+}
+
+bool16 parse_inputs(int nargs, char *args[])
+{
+	bool16 inputSettings = 0;
+
+	char ch;	 /* next character of argument	    */
+	char *chptr; /* walks along argument string	*/
+
+	int32 count = 0;
+	int32 setting = 0;
+	int32 i = 0;
+
+	for (count = 1; count < nargs; ++count)
+	{
+		i = 0;
+		setting = 0;
+		chptr = args[count];
+		ch = *chptr++;
+
+		// check to see what the first char is.
+		switch (ch)
+		{
+		case '-':
+			/* found flag(s) in the input fields. */
+			ch = *chptr++;
+
+			while (ch != NULL)
+			{
+				switch (ch)
+				{
+				case 'u':
+					/* u = unlock the system. */
+					inputSettings = 0;
+					setEncryptUnlock(inputSettings);
+
+					break;
+				case 'l':
+					/* l = lock the system. */
+					inputSettings = 0;
+					setEncryptLock(inputSettings);
+					break;
+				case 'c':
+					/* c = encrypt lower case values. */
+					setEncryptLowerCase(inputSettings);
+					g_enigma_encrypt_char_count += NUM_CHARS;
+					break;
+				case 'C':
+					/* C = encrypt Upper case values. */
+					setEncryptUpperCase(inputSettings);
+					g_enigma_encrypt_char_count += NUM_CHARS;
+					break;
+				case 'n':
+					/* n = encrypt number values. */
+					setEncryptNumbers(inputSettings);
+					g_enigma_encrypt_char_count += NUM_NUMS;
+					break;
+				case 'w':
+					/* w = encrypt white space values. */
+					setEncryptWhiteSpace(inputSettings);
+					g_enigma_encrypt_char_count += NUM_WHITESPACE;
+					break;
+				case 's':
+					/* s = encrypt symbol values. */
+					setEncryptSymbols(inputSettings);
+					g_enigma_encrypt_char_count += NUM_SYMBOLS;
+					break;
+
+				case 'i':
+					/* i = reset the rotors to the initial positions. */
+					setEncryptResetRotorsPositions(inputSettings);
+					break;
+				case 'v':
+					/* v = verbose mode and print out info. */
+					setEncryptVerbose(inputSettings);
+					break;
+
+				default:
+					/* should not reach this for flag values.  If so just ignore the values. */
+					break;
+				}
+
+				/* get the next char value if there is one. */
+				ch = *chptr++;
+			}
+
+			/* done with the flag '-' switch case */
+			break;
+
+		default:
+			/* if the value is not a flag, then it must be rotor information.
+			 * assume the value is a tuplet value set.  3 ints divided by ','
+			 * assume default value of 0 for the last two sets if not present.
+			 * */
+
+			while (ch != NULL && i < 3)
+			{
+				if (ch == ',')
+				{
+					/* found a divider for rotor values.  So store the value we have. */
+					switch (i)
+					{
+					case 0:
+						/* first value found and it is the type of rotor. */
+						g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
+						break;
+					case 1:
+						/* second value found and it is the shift of the rotor encoder. */
+						g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
+						break;
+					case 2:
+						/* third value found and it is the starting position of the rotor. */
+						g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
+						break;
+					default:
+						/* any values found after this should be ignored */
+						break;
+					}
+					setting = 0;
+					++i;
+				}
+				else if ((ch >= '0') && (ch <= '9'))
+				{
+					/* found a char that is in the number range.  
+					 * So convert char to int and add it to the setting value.
+					 * */
+					setting = 10 * setting + (ch - '0');
+				}
+
+				/* get the next char value if there is one. */
+				ch = *chptr++;
+			}
+			/* need to address the case where setting is not set. */
+			switch (i)
+			{
+			case 2:
+				/* just the staring value needs to be set. */
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = setting;
+				break;
+			case 1:
+				/* need to set the shift setting and set start position to 0. */
+				g_enigma_rotor_settings[g_enigma_rotor_count].shift = setting;
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
+				break;
+
+			case 0:
+				/* need to set the type setting and set other values to 0. */
+				g_enigma_rotor_settings[g_enigma_rotor_count].type = setting;
+				g_enigma_rotor_settings[g_enigma_rotor_count].shift = 0;
+				g_enigma_rotor_settings[g_enigma_rotor_count].start = 0;
+				break;
+			default:
+				break;
+			}
+
+			/* set rotor position to the starting position. */
+			g_enigma_rotor_settings[g_enigma_rotor_count].position = g_enigma_rotor_settings[g_enigma_rotor_count].start;
+
+			++g_enigma_rotor_count;
+
+			/* done with the default (rotor values) switch case. */
+			break;
+		}
+	}
+
+	return inputSettings;
+}
+
+void print_input_settings(bool16 inputSettings)
+{
+	/* print out the input values pulled from the input args. */
+	printf("INPUT SETTINGS:\n");
+	printf(" encrypt lower_char   : %d\n", shouldEncryptLowerCase(inputSettings));
+	printf(" encrypt upper_char   : %d\n", shouldEncryptUpperCase(inputSettings));
+	printf(" encrypt numbers      : %d\n", shouldEncryptNumbers(inputSettings));
+	printf(" encrypt white_space  : %d\n", shouldEncryptWhiteSpace(inputSettings));
+	printf(" encrypt symbols      : %d\n", shouldEncryptSymbols(inputSettings));
+	printf(" encrypt lock         : %d\n", shouldEncryptLock(inputSettings));
+	printf(" encrypt unlock       : %d\n", shouldEncryptUnlock(inputSettings));
+	printf(" encrypt verbose      : %d\n", shouldEncryptVerbose(inputSettings));
+	printf(" encrypt reset rotors : %d\n", shouldEncryptResetRotorsPositions(inputSettings));
+}
+
+void print_global_settings()
+{
+	printf("GLOBAL SETTINGS:\n");
+	printf(" enigma rotor count   : %d\n", g_enigma_rotor_count);
+	printf(" enigma char count    : %d\n", g_enigma_encrypt_char_count);
+}
+
+void print_rotor_settings()
+{
+	int16 i;
+
+	printf("ROTOR SETTINGS:\n");
+	for (i = 0; i < g_enigma_rotor_count; ++i)
+	{
+		printf(" %d | %d %d %d %d\n", i,
+			   g_enigma_rotor_settings[i].type,
+			   g_enigma_rotor_settings[i].shift,
+			   g_enigma_rotor_settings[i].start,
+			   g_enigma_rotor_settings[i].position);
+	}
+}
+
+void print_rotor_setup()
+{
+	int16 i;
+	int16 j;
+	int32 rotor_set = 0;
+
 	printf("ROTOR SETUP:\n");
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{
-		printf(" %d |", i);
+		rotor_set = i * g_enigma_encrypt_char_count;
+
+		printf(" %df |", i);
 		for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 		{
-			if (j % 25 == 0 && j != 0)
+			if (j % PRINT_NUM_LENGTH == 0 && j != 0)
 			{
 				printf("\n   |");
 			}
-			printf(" %d", g_enigma_rotors[i * g_enigma_encrypt_char_count + j]);
+			printf(" %02d", g_enigma_rotors[rotor_set + j].forword);
+		}
+		printf("\n");
+		printf(" %db |", i);
+		for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+		{
+			if (j % PRINT_NUM_LENGTH == 0 && j != 0)
+			{
+				printf("\n   |");
+			}
+			printf(" %02d", g_enigma_rotors[rotor_set + j].backward);
 		}
 		printf("\n");
 	}
 	printf("\n");
+}
 
-	return SHELL_OK;
+void print_chars_to_encrypt()
+{
+	int16 i;
+
+	printf("ENCRYPT CHARS SETUP:");
+	for (i = 0; i < g_enigma_encrypt_char_count; ++i)
+	{
+		if (i % PRINT_CHAR_LENGTH == 0)
+		{
+			printf("\n");
+		}
+		printf(" %c", g_enigma_encrypt_chars[i]);
+	}
+	printf("\n");
+}
+
+void rotor_setup_type_1(int16 rotor_set, int16 shift)
+{
+	int16 i;
+	int16 t;
+
+	// A B C D E F G H ...
+	for (i = 0; i < g_enigma_encrypt_char_count; ++i)
+	{
+		t = (i + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + i].forword = t;
+		g_enigma_rotors[rotor_set + t].backward = i;
+	}
+}
+
+void rotor_setup_type_2(int16 rotor_set, int16 shift)
+{
+	int16 i;
+	int16 j;
+	int16 t;
+
+	// Z Y X W V U T S ...
+	for (i = 0, j = g_enigma_encrypt_char_count - 1; i < g_enigma_encrypt_char_count; ++i, --j)
+	{
+		t = (j + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + i].forword = t;
+		t = (i + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + t].backward = j;
+	}
+}
+
+void rotor_setup_type_3(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	// B A D C F E H G ...
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		t = (j + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
+	{
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + j + 1].forword;
+		g_enigma_rotors[rotor_set + j + 1].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void rotor_setup_type_4(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	// Y Z W X U V S T ...
+	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+	{
+		t = (k + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; j += 2)
+	{
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + j + 1].forword;
+		g_enigma_rotors[rotor_set + j + 1].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void rotor_setup_type_5(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		t = (j + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = (j + j + 1) % g_enigma_encrypt_char_count;
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + k].forword;
+		g_enigma_rotors[rotor_set + k].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void rotor_setup_type_6(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		t = (j + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = (j + j + j + 1) % g_enigma_encrypt_char_count;
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + k].forword;
+		g_enigma_rotors[rotor_set + k].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void rotor_setup_type_7(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+	{
+		t = (k + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = (j + j + 1) % g_enigma_encrypt_char_count;
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + k].forword;
+		g_enigma_rotors[rotor_set + k].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void rotor_setup_type_8(int16 rotor_set, int16 shift)
+{
+	int16 j;
+	int16 k;
+	int16 t;
+
+	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
+	{
+		t = (k + shift) % g_enigma_encrypt_char_count;
+		g_enigma_rotors[rotor_set + j].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = (j + j + j + 1) % g_enigma_encrypt_char_count;
+		t = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + j].forword = g_enigma_rotors[rotor_set + k].forword;
+		g_enigma_rotors[rotor_set + k].forword = t;
+	}
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		k = g_enigma_rotors[rotor_set + j].forword;
+		g_enigma_rotors[rotor_set + k].backward = j;
+	}
 }
