@@ -4,21 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 
-bool16 parse_inputs(int, char *[]);
-void print_input_settings(bool16);
-void print_global_settings();
-void print_rotor_settings();
-void print_chars_to_encrypt();
-void print_rotor_setup();
-void rotor_setup_type_1(int16, int16);
-void rotor_setup_type_2(int16, int16);
-void rotor_setup_type_3(int16, int16);
-void rotor_setup_type_4(int16, int16);
-void rotor_setup_type_5(int16, int16);
-void rotor_setup_type_6(int16, int16);
-void rotor_setup_type_7(int16, int16);
-void rotor_setup_type_8(int16, int16);
-
 /*------------------------------------------------------------------------
  * xsh_lock - This command locks the system so that everything is encrypted.
  *------------------------------------------------------------------------
@@ -73,6 +58,7 @@ shellcmd xsh_lock(int nargs, char *args[])
 	int16 i = 0;
 	int16 j = 0;
 	int16 k = 0;
+	int16 reflector_shift = 0;
 	int32 rotor_set = 0;
 
 	if (shouldEncryptUnlock(encryptInputSettings))
@@ -99,12 +85,14 @@ shellcmd xsh_lock(int nargs, char *args[])
 		// allocate memory for the rotor array.
 		g_enigma_encrypt_chars = getmem(g_enigma_encrypt_char_count * sizeof(char));
 		g_enigma_rotors = (struct rotor_vals *)getmem(g_enigma_rotor_count * g_enigma_encrypt_char_count * sizeof(struct rotor_vals));
+		g_enigma_reflector = getmem(g_enigma_encrypt_char_count * sizeof(char));
 
 		// setup Rotor values:  Translate rotor int value into char values.
 
 		i = 0;
 		if (i < g_enigma_encrypt_char_count && shouldEncryptNumbers(encryptInputSettings))
 		{
+			++reflector_shift;
 			for (k = 0; k < NUM_NUMS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = '0' + k;
@@ -113,6 +101,7 @@ shellcmd xsh_lock(int nargs, char *args[])
 		}
 		if (i < g_enigma_encrypt_char_count && shouldEncryptLowerCase(encryptInputSettings))
 		{
+			++reflector_shift;
 			for (k = 0; k < NUM_CHARS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = 'a' + k;
@@ -121,6 +110,7 @@ shellcmd xsh_lock(int nargs, char *args[])
 		}
 		if (i < g_enigma_encrypt_char_count && shouldEncryptUpperCase(encryptInputSettings))
 		{
+			++reflector_shift;
 			for (k = 0; k < NUM_CHARS; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = 'A' + k;
@@ -129,12 +119,14 @@ shellcmd xsh_lock(int nargs, char *args[])
 		}
 		if (i < g_enigma_encrypt_char_count && shouldEncryptWhiteSpace(encryptInputSettings))
 		{
+			++reflector_shift;
 			g_enigma_encrypt_chars[i++] = ' ';
 			g_enigma_encrypt_chars[i++] = '\n';
 			g_enigma_encrypt_chars[i++] = '\t';
 		}
 		if (i < g_enigma_encrypt_char_count && shouldEncryptSymbols(encryptInputSettings))
 		{
+			++reflector_shift;
 			for (k = 0; k < 15; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = '!' + k;
@@ -164,27 +156,35 @@ shellcmd xsh_lock(int nargs, char *args[])
 			switch (g_enigma_rotor_settings[i].type)
 			{
 			case 1:
+				++reflector_shift;
 				rotor_setup_type_1(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 2:
+				++reflector_shift;
 				rotor_setup_type_2(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 3:
+				++reflector_shift;
 				rotor_setup_type_3(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 4:
+				++reflector_shift;
 				rotor_setup_type_4(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 5:
+				++reflector_shift;
 				rotor_setup_type_5(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 6:
+				++reflector_shift;
 				rotor_setup_type_6(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 7:
+				++reflector_shift;
 				rotor_setup_type_7(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 8:
+				++reflector_shift;
 				rotor_setup_type_8(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 
@@ -193,12 +193,15 @@ shellcmd xsh_lock(int nargs, char *args[])
 				break;
 			}
 		}
+
+		reflector_setup(reflector_shift);
 	}
 
 	if (shouldEncryptVerbose(encryptInputSettings))
 	{
 		print_chars_to_encrypt();
-		print_rotor_setup();
+		print_rotor();
+		print_reflector();
 	}
 
 	return SHELL_OK;
@@ -407,18 +410,30 @@ void print_rotor_settings()
 	}
 }
 
-void print_rotor_setup()
+void print_rotor()
 {
 	int16 i;
 	int16 j;
 	int32 rotor_set = 0;
 
 	printf("ROTOR SETUP:\n");
+
+	printf("---|", i);
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		if (j % PRINT_NUM_LENGTH == 0 && j != 0)
+		{
+			break;
+		}
+		printf("-%02d", j);
+	}
+	printf("\n");
+
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{
 		rotor_set = i * g_enigma_encrypt_char_count;
 
-		printf(" %df |", i);
+		printf(" %d |", i);
 		for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 		{
 			if (j % PRINT_NUM_LENGTH == 0 && j != 0)
@@ -427,8 +442,7 @@ void print_rotor_setup()
 			}
 			printf(" %02d", g_enigma_rotors[rotor_set + j].forword);
 		}
-		printf("\n");
-		printf(" %db |", i);
+		printf("\n - |");
 		for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 		{
 			if (j % PRINT_NUM_LENGTH == 0 && j != 0)
@@ -438,6 +452,24 @@ void print_rotor_setup()
 			printf(" %02d", g_enigma_rotors[rotor_set + j].backward);
 		}
 		printf("\n");
+	}
+	printf("\n");
+}
+
+void print_reflector()
+{
+	int16 j;
+
+	printf("REFLECTOR SETUP:\n");
+
+	printf(" R |");
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
+	{
+		if (j % PRINT_NUM_LENGTH == 0 && j != 0)
+		{
+			printf("\n   |");
+		}
+		printf(" %02d", g_enigma_reflector[j]);
 	}
 	printf("\n");
 }
@@ -461,7 +493,7 @@ void print_chars_to_encrypt()
 void rotor_setup_type_1(int16 rotor_set, int16 shift)
 {
 	int16 i;
-	int16 t;
+	char t;
 
 	// A B C D E F G H ...
 	for (i = 0; i < g_enigma_encrypt_char_count; ++i)
@@ -476,7 +508,7 @@ void rotor_setup_type_2(int16 rotor_set, int16 shift)
 {
 	int16 i;
 	int16 j;
-	int16 t;
+	char t;
 
 	// Z Y X W V U T S ...
 	for (i = 0, j = g_enigma_encrypt_char_count - 1; i < g_enigma_encrypt_char_count; ++i, --j)
@@ -492,7 +524,7 @@ void rotor_setup_type_3(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	// B A D C F E H G ...
 	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
@@ -517,7 +549,7 @@ void rotor_setup_type_4(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	// Y Z W X U V S T ...
 	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
@@ -542,7 +574,7 @@ void rotor_setup_type_5(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 	{
@@ -567,7 +599,7 @@ void rotor_setup_type_6(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 	{
@@ -592,7 +624,7 @@ void rotor_setup_type_7(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
 	{
@@ -617,7 +649,7 @@ void rotor_setup_type_8(int16 rotor_set, int16 shift)
 {
 	int16 j;
 	int16 k;
-	int16 t;
+	char t;
 
 	for (j = 0, k = g_enigma_encrypt_char_count - 1; j < g_enigma_encrypt_char_count; ++j, --k)
 	{
@@ -635,5 +667,19 @@ void rotor_setup_type_8(int16 rotor_set, int16 shift)
 	{
 		k = g_enigma_rotors[rotor_set + j].forword;
 		g_enigma_rotors[rotor_set + k].backward = j;
+	}
+}
+
+void reflector_setup(int16 shift)
+{
+	int16 j;
+	int16 k;
+	char t;
+
+	/* setup for reflector is the same as rotor setup type 5. */
+	for (j = 0; j < g_enigma_encrypt_char_count / 2; ++j)
+	{
+		g_enigma_reflector[j] = g_enigma_encrypt_char_count - j - 1;
+		g_enigma_reflector[g_enigma_encrypt_char_count - j - 1] = j;
 	}
 }

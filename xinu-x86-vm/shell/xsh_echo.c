@@ -82,7 +82,7 @@ syscall encryptf(char *string)
 		{
 			++i_val;
 		}
-		printf("\n [%c:%d] ", ch, i_val);
+		printf(" [%c:%d]", ch, i_val);
 
 		// TODO: @Patrick need to update this at some later time.
 		if (g_enigma_encrypt_chars[i_val] != ch)
@@ -94,17 +94,41 @@ syscall encryptf(char *string)
 		val = i_val;
 		for (i = 0; i < g_enigma_rotor_count; ++i)
 		{
-			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count].forword;
+			val = val + g_enigma_rotor_settings[i].position;
+			if (val > g_enigma_encrypt_char_count)
+			{
+				val -= g_enigma_encrypt_char_count;
+			}
+			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + val].forword;
+			val = val - g_enigma_rotor_settings[i].position;
+			if (val < 0)
+			{
+				val += g_enigma_encrypt_char_count;
+			}
 			printf(" %d", val);
 		}
+
+		val = g_enigma_reflector[val];
+		printf(" |%d|", val);
+
 		for (i = g_enigma_rotor_count - 1; i >= 0; --i)
 		{
-			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + (val + g_enigma_rotor_settings[i].position) % g_enigma_encrypt_char_count].backward;
+			val = val + g_enigma_rotor_settings[i].position;
+			if (val > g_enigma_encrypt_char_count)
+			{
+				val -= g_enigma_encrypt_char_count;
+			}
+			val = g_enigma_rotors[i * g_enigma_encrypt_char_count + val].backward;
+			val = val - g_enigma_rotor_settings[i].position;
+			if (val < 0)
+			{
+				val += g_enigma_encrypt_char_count;
+			}
 			printf(" %d", val);
 		}
 		printf(" = ");
 
-		// all done encoding/decoding now to update rotor positions.
+		/* all done encoding/decoding now to update rotor positions. */
 		i = g_enigma_rotor_count - 1;
 		j = 1;
 		while (i >= 0)
@@ -126,9 +150,9 @@ syscall encryptf(char *string)
 		}
 
 		printf("%c", g_enigma_encrypt_chars[val]);
+		printf("\n");
 		ch = *string++;
 	}
-	printf("\n");
 
 	for (i = 0; i < g_enigma_rotor_count; ++i)
 	{

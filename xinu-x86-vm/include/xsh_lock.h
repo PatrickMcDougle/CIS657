@@ -86,3 +86,21 @@ char *g_enigma_reflector;
 #define setEncryptUnlock(x) (setBit7(x))
 #define setEncryptVerbose(x) (setBit8(x))
 #define setEncryptResetRotorsPositions(x) (setBit9(x))
+
+/* Function Decleartions used for Encryption Setup. */
+bool16 parse_inputs(int, char *[]);
+void print_input_settings(bool16);
+void print_global_settings();
+void print_rotor_settings();
+void print_rotor();
+void print_reflector();
+void print_chars_to_encrypt();
+void rotor_setup_type_1(int16, int16);
+void rotor_setup_type_2(int16, int16);
+void rotor_setup_type_3(int16, int16);
+void rotor_setup_type_4(int16, int16);
+void rotor_setup_type_5(int16, int16);
+void rotor_setup_type_6(int16, int16);
+void rotor_setup_type_7(int16, int16);
+void rotor_setup_type_8(int16, int16);
+void reflector_setup(int16 shift);
