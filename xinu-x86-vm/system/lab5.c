@@ -14,7 +14,9 @@ syscall lab5_process(
 
     sleep(15);
 
-    while (TRUE)
+    int16 i;
+    for (i = 0; i < 100; ++i)
+    // while (TRUE)
     {
         kprintf("priority & pid: [%d,%d]\n", priority, getpid());
     }
