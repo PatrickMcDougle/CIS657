@@ -674,12 +674,17 @@ void reflector_setup(int16 shift)
 {
 	int16 j;
 	int16 k;
+	int16 half = g_enigma_encrypt_char_count / 2;
 	char t;
 
-	/* setup for reflector is the same as rotor setup type 5. */
-	for (j = 0; j < g_enigma_encrypt_char_count / 2; ++j)
+	for (j = 0; j < g_enigma_encrypt_char_count; ++j)
 	{
-		g_enigma_reflector[j] = g_enigma_encrypt_char_count - j - 1;
-		g_enigma_reflector[g_enigma_encrypt_char_count - j - 1] = j;
+		g_enigma_reflector[j] = j;
+	}
+	for (j = 0, k = g_enigma_encrypt_char_count - half; j < half; ++j, ++k)
+	{
+		t = g_enigma_reflector[j];
+		g_enigma_reflector[j] = g_enigma_reflector[k];
+		g_enigma_reflector[k] = t;
 	}
 }
