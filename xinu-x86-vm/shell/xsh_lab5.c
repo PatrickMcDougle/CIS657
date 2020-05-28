@@ -43,9 +43,16 @@ shellcmd xsh_scheduler(int nargs, char *args[])
 		}
 
 		i = atoi(args[1]);
-		if (i == SCHED_RRP || i == SCHED_FCFS)
+		if (i == SCHED_RRP)
 		{
-			g_xinuSchedulerType = i;
+			kprintf("Scheduler type:  Round Robin Priority\n");
+			g_xinuSchedulerType = SCHED_RRP;
+			return SHELL_OK;
+		}
+		if (i == SCHED_FCFS)
+		{
+			kprintf("Scheduler type:  First Come First Serve\n");
+			g_xinuSchedulerType = SCHED_FCFS;
 			return SHELL_OK;
 		}
 
