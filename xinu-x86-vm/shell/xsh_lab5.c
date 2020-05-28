@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+int32 g_xinuSchedulerType; /* Global variable holding the scheduler type value	*/
+
 /*------------------------------------------------------------------------
  * xsh_exit  -  shell command returns the exit code causing shell exit
  *------------------------------------------------------------------------
@@ -99,8 +101,8 @@ shellcmd xsh_process(int nargs, char *args[])
 
 	for (i = 0; i < numberOfProcesses; ++i)
 	{
-		sprintf(processName, "Process %d", i);
-		processID = create(lab5_process, 512, priorityVal, processName, 1, 5);
+		sprintf(processName, "Process %d", i + 1);
+		processID = create(lab5_process, 512, priorityVal, processName, 1, priorityVal);
 		resume(processID);
 		priorityVal += 5;
 	}

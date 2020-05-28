@@ -15,10 +15,10 @@ syscall lab5_process(
     sleep(15);
 
     int16 i;
-    for (i = 0; i < 1000; ++i)
+    for (i = 0; i < 100; ++i)
     // while (TRUE)
     {
-        kprintf("priority & pid: [%d,%d]\n", priority, getpid());
+        kprintf("priority & pid: [%d,%d] - %d\n", priority, getpid(), i);
     }
 
     return OK;
