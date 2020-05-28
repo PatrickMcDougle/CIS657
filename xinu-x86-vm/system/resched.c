@@ -6,14 +6,15 @@
  *  resched  -  Reschedule processor to highest priority eligible process
  *------------------------------------------------------------------------
  */
-void	resched(void)		/* assumes interrupts are disabled	*/
+void resched(void) /* assumes interrupts are disabled	*/
 {
-	struct procent *ptold;	/* ptr to table entry for old process	*/
-	struct procent *ptnew;	/* ptr to table entry for new process	*/
+	struct procent *ptold; /* ptr to table entry for old process	*/
+	struct procent *ptnew; /* ptr to table entry for new process	*/
 
 	/* If rescheduling is deferred, record attempt and return */
 
-	if (Defer.ndefers > 0) {
+	if (Defer.ndefers > 0)
+	{
 		Defer.attempt = TRUE;
 		return;
 	}
@@ -22,8 +23,17 @@ void	resched(void)		/* assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
-	if (ptold->prstate == PR_CURR) {  /* process remains running */
-		if (ptold->prprio > firstkey(readylist)) {
+	if (ptold->prstate == PR_CURR)
+	{
+		/* process remains running */
+
+		if (g_xinuSchedulerType == SCHED_FCFS && ptold->prprio > 0)
+		{
+			return;
+		}
+
+		if (ptold->prprio > firstkey(readylist))
+		{
 			return;
 		}
 
@@ -38,7 +48,7 @@ void	resched(void)		/* assumes interrupts are disabled	*/
 	currpid = dequeue(readylist);
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
-	preempt = QUANTUM;		/* reset time slice for process	*/
+	preempt = QUANTUM; /* reset time slice for process	*/
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */
