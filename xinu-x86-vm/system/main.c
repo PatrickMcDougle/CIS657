@@ -18,8 +18,11 @@ int main(int argc, char **argv)
 		kprintf("\n\n\rMain process recreating shell\n\n\r");
 		resume(create(shell, 4096, 1, "shell", 1, CONSOLE));
 	}
-	while (1)
-		;
+	
+	while (TRUE)
+	{
+		// do nothing at this time.
+	}
 
 	return OK;
 }
