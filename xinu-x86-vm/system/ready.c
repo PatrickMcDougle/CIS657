@@ -29,18 +29,15 @@ status ready(
 	{
 		// FCFS
 		enqueue(pid, readylist);
-		if (pid == 0)
-		{
-			resched();
-		}
 	}
 	else /* Default: Round Robin Priority */
 	{
 		insert(pid, readylist, prptr->prprio);
-		if (resch == RESCHED_YES)
-		{
-			resched();
-		}
+	}
+
+	if (resch == RESCHED_YES)
+	{
+		resched();
 	}
 
 	return OK;
