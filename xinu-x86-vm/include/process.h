@@ -19,8 +19,8 @@
 
 /* Miscellaneous process definitions */
 
-#define PNMLEN 16	/* length of process "name"					*/
-#define NULLPROC 0	/* ID of the null process					*/
+#define PNMLEN 16  /* length of process "name"					*/
+#define NULLPROC 0 /* ID of the null process					*/
 
 /* Process initialization constants */
 
