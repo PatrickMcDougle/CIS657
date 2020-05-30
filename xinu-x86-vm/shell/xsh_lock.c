@@ -211,7 +211,7 @@ bool16 parse_inputs(int nargs, char *args[])
 {
 	bool16 inputSettings = 0;
 
-	char ch;	 /* next character of argument	    */
+	char ch;	 /* next character of argument	*/
 	char *chptr; /* walks along argument string	*/
 
 	int32 count = 0;
@@ -412,8 +412,8 @@ void print_rotor_settings()
 
 void print_rotor()
 {
-	int16 i;
-	int16 j;
+	int16 i = 0;
+	int16 j = 0;
 	int32 rotor_set = 0;
 
 	printf("ROTOR SETUP:\n");
