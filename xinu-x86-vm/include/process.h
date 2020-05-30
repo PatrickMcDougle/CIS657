@@ -57,6 +57,7 @@ struct procent
 	pid32 prparent;		 /* id of the creating process			*/
 	umsg32 prmsg;		 /* message sent to this process		*/
 	bool8 prhasmsg;		 /* nonzero iff msg is valid			*/
+	struct message* msgbuff;
 	int16 prdesc[NDESC]; /* device descriptors for process		*/
 };
 
