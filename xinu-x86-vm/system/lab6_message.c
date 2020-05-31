@@ -94,19 +94,18 @@ umsg32 receivek(void)
 	prptr = &proctab[currpid];
 	if (prptr->prhasmsg == FALSE)
 	{
+		/* block until message arrives	*/
 		prptr->prstate = PR_RECV;
-		resched(); /* block until message arrives			*/
+		resched();
 	}
 
-	msg = prptr->msgbuff->msg; /* retrieve message			*/
+	/* retrieve message			*/
+	msg = prptr->msgbuff->msg;
 	prptr->msgbuff->msgState = MSG_FREE;
 	prptr->msgbuff = prptr->msgbuff->msgNext;
 
-	if (prptr->msgbuff == NULL)
-	{
-		kprintf("Found Last Message\n");
-		prptr->prhasmsg = FALSE; /* reset message flag		*/
-	}
+	/* reset message flag		*/
+	prptr->prhasmsg = (prptr->msgbuff == NULL) ? FALSE : TRUE;
 
 	restore(mask);
 	return msg;
