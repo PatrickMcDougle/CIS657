@@ -1,10 +1,10 @@
 typedef byte ms8;
 
-#define MSG_ERROR 0;
-#define MSG_VALID 1;
-#define MSG_FREE 2;
+#define MSG_ERROR 0
+#define MSG_VALID 1
+#define MSG_FREE 2
 
-#define MSG_BUF_SIZE 100;
+#define MSG_BUF_SIZE 100
 
 struct message
 {
