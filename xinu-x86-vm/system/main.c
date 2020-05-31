@@ -8,11 +8,15 @@ int main(int argc, char **argv)
 	uint32 retval;
 
 	pid32 cpid = getpid();
+	sendk(cpid, 1);
 	sendk(cpid, 2);
-	sendk(cpid, 3);
-	sendk(cpid, 4);
+	sendk(cpid+1, 3);
+	sendk(cpid+1, 4);
 	sendk(cpid, 5);
 	sendk(cpid, 6);
+	sendk(cpid+1, 7);
+	sendk(cpid, 8);
+	sendk(cpid, 9);
 
 	kprintf("Message: %d\n", receivek());
 	kprintf("Message: %d\n", receivek());
