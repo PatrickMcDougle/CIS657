@@ -110,3 +110,13 @@ umsg32 receivek(void)
 	restore(mask);
 	return msg;
 }
+
+syscall receiver(void)
+{
+	while (TRUE)
+	{
+		kprintf("Message: %d\n", receivek());
+	}
+
+	return OK;
+}

@@ -34,6 +34,11 @@ extern shellcmd xsh_ipaddr(int32, char *[]);
 /* in file xsh_kill.c */
 extern shellcmd xsh_kill(int32, char *[]);
 
+/* in file xsh_lab6.c */
+extern shellcmd xsh_sendk(int32, char *[]);
+extern shellcmd xsh_receivek(int32, char *[]);
+extern shellcmd xsh_printmsgbuff(int32, char *[]);
+
 /* in file xsh_led.c */
 extern shellcmd xsh_led(int32, char *[]);
 

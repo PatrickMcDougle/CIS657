@@ -15,3 +15,6 @@ struct message
 };
 
 extern struct message msgtab[];
+
+
+syscall receiver(void);
