@@ -20,9 +20,9 @@ const struct cmdent cmdtab[] = {
 	{"memstat", FALSE, xsh_memstat},
 	{"ps", FALSE, xsh_ps},
 	{"sleep", FALSE, xsh_sleep},
-	{"r", FALSE, xsh_receivek},
-	{"s", FALSE, xsh_sendk},
-	{"p", FALSE, xsh_printmsgbuff},
+	{"receivek", FALSE, xsh_receivek},
+	{"sendk", FALSE, xsh_sendk},
+	{"print", FALSE, xsh_printmsgbuff},
 	{"?", FALSE, xsh_help}
 
 };

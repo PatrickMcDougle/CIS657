@@ -39,6 +39,8 @@ shellcmd xsh_sendk(int nargs, char *args[])
 		return SHELL_ERROR;
 	}
 
+	// read in the first argument which should be the process ID
+	// value for where the messages should go.
 	chptr = args[1];
 	ch = *chptr++;
 	pid = 0;
@@ -54,10 +56,12 @@ shellcmd xsh_sendk(int nargs, char *args[])
 	}
 	if (pid == 0)
 	{
-		fprintf(stderr, "%s: cannot kill the null process\n", args[0]);
+		fprintf(stderr, "%s: cannot send a message to the null process\n", args[0]);
 		return SHELL_ERROR;
 	}
 
+	// For each argument after the first two, process them as message numbers
+	// that are 32 bit unsigned integers.
 	for (i = 2; i < nargs; ++i)
 	{
 		chptr = args[i];
@@ -108,6 +112,7 @@ shellcmd xsh_receivek(int nargs, char *args[])
 		return SHELL_ERROR;
 	}
 
+	// start a process that runs in the background waiting for messages to show up.
 	resume(create(receiver, 1024, 20, "receiver", 0));
 
 	return SHELL_OK;
@@ -119,6 +124,9 @@ shellcmd xsh_receivek(int nargs, char *args[])
  */
 shellcmd xsh_printmsgbuff(int nargs, char *args[])
 {
+	int16 i;
+	struct message *msgPtr;
+
 	/* Output info for '--help' argument */
 
 	if (nargs == 2 && strncmp(args[1], "--help", 7) == 0)
@@ -138,12 +146,14 @@ shellcmd xsh_printmsgbuff(int nargs, char *args[])
 		fprintf(stderr, "Try '%s --help' for more information\n", args[0]);
 		return SHELL_ERROR;
 	}
-	int16 i;
+
+	// just print out all the valid messages in the buffer.
 	for (i = 0; i < MSG_BUF_SIZE; ++i)
 	{
+		msgPtr = &msgtab[i];
 		if (msgtab[i].msgState == MSG_VALID)
 		{
-			kprintf(" [%d] %d:%u\n", i, msgtab[i].processId, msgtab[i].msg);
+			kprintf(" [%d] %d|%d:%u\n", i, msgPtr->processId, msgPtr->msgState, msgPtr->msg);
 		}
 	}
 
