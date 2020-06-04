@@ -5,7 +5,7 @@
 #include "shprototypes.h"
 
 /************************************************************************/
-/* Xinu shell commands and the function associated with each		*/
+/* Xinu shell commands and the function associated with each			*/
 /************************************************************************/
 const struct cmdent cmdtab[] = {
 	{"argecho", TRUE, xsh_argecho},
@@ -30,57 +30,57 @@ const struct cmdent cmdtab[] = {
 uint32 ncmd = sizeof(cmdtab) / sizeof(struct cmdent);
 
 /************************************************************************/
-/* Xinu shell - provide an interactive user interface that executes	*/
-/*		commands.  Each command begins with a command name, has	*/
-/*		a set of optional arguments, has optional input or	*/
-/*		output redirection, and an optional specification for	*/
-/*		background execution (ampersand).  The syntax is:	*/
-/*									*/
-/*		   command_name [args*] [redirection] [&]		*/
-/*									*/
-/*		Redirection is either or both of:			*/
-/*									*/
-/*				< input_file				*/
-/*			or						*/
-/*				> output_file				*/
-/*									*/
+/* Xinu shell - provide an interactive user interface that executes		*/
+/*		commands.  Each command begins with a command name, has			*/
+/*		a set of optional arguments, has optional input or				*/
+/*		output redirection, and an optional specification for			*/
+/*		background execution (ampersand).  The syntax is:				*/
+/*																		*/
+/*		   command_name [args*] [redirection] [&]						*/
+/*																		*/
+/*		Redirection is either or both of:								*/
+/*																		*/
+/*				< input_file											*/
+/*			or															*/
+/*				> output_file											*/
+/*																		*/
 /************************************************************************/
 
 process shell(
 	did32 dev /* ID of tty device from which	*/
 	)		  /*  to accept commands		*/
 {
-	char buf[SHELL_BUFLEN]; /* input line (large enough for	*/
-	/*  one line from a tty device	*/
-	int32 len;				   /* length of line read		*/
-	char tokbuf[SHELL_BUFLEN + /* buffer to hold a set of	*/
-				SHELL_MAXTOK]; /* contiguous null-terminated	*/
-	/* strings of tokens		*/
-	int32 tlen; /* current length of all data	*/
-	/*   in array tokbuf		*/
-	int32 tok[SHELL_MAXTOK]; /* index of each token in	*/
-	/*   tokbuf			*/
+	char buf[SHELL_BUFLEN];		/* input line (large enough for	*/
+								/*  one line from a tty device	*/
+	int32 len;					/* length of line read			*/
+	char tokbuf[SHELL_BUFLEN +	/* buffer to hold a set of		*/
+				SHELL_MAXTOK];	/* contiguous null-terminated	*/
+								/* strings of tokens			*/
+	int32 tlen;					/* current length of all data	*/
+								/*   in array tokbuf			*/
+	int32 tok[SHELL_MAXTOK];	/* index of each token in		*/
+								/*   tokbuf						*/
 	int32 toktyp[SHELL_MAXTOK]; /* type of each token in tokbuf	*/
-	int32 ntok;					/* number of tokens on line	*/
+	int32 ntok;					/* number of tokens on line		*/
 	pid32 child;				/* process ID of spawned child	*/
 	bool8 backgnd;				/* run command in background?	*/
-	char *outname, *inname;		/* ptrs to strings for file	*/
-	/*   names that follow > and <	*/
-	did32 stdinput, stdoutput; /* descriptors for redirected	*/
-	/*   input and output		*/
-	int32 i;   /* index into array of tokens	*/
-	int32 j;   /* index into array of commands	*/
-	int32 msg; /* message from receive() for	*/
-	/*   child termination		*/
-	int32 tmparg; /* address of this var is used	*/
-	/*   when first creating child	*/
-	/*   process, but is replaced	*/
-	char *src, *cmp; /* ptrs using during name	*/
-	/*   comparison			*/
-	bool8 diff; /* was difference found during	*/
-	/*   comparison			*/
-	char *args[SHELL_MAXTOK]; /* argument vector passed to	*/
-	/*   builtin commands		*/
+	char *outname, *inname;		/* ptrs to strings for file		*/
+								/*   names that follow > and <	*/
+	did32 stdinput, stdoutput;	/* descriptors for redirected	*/
+								/*   input and output			*/
+	int32 i;					/* index into array of tokens	*/
+	int32 j;					/* index into array of commands	*/
+	int32 msg;					/* message from receive() for	*/
+								/*   child termination			*/
+	int32 tmparg;				/* address of this var is used	*/
+								/*   when first creating child	*/
+								/*   process, but is replaced	*/
+	char *src, *cmp;			/* ptrs using during name		*/
+								/*   comparison					*/
+	bool8 diff;					/* was difference found during	*/
+								/*   comparison					*/
+	char *args[SHELL_MAXTOK];	/* argument vector passed to	*/
+								/*   builtin commands			*/
 
 	/* Print shell banner and startup message */
 
