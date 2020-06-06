@@ -9,16 +9,16 @@
  */
 shellcmd xsh_footclan(int nargs, char *args[])
 {
-    int32 i; /* walks through args array	*/
-    sid32 sidRocksteady;
-    sid32 sidBebop;
-    pri16 priority = 35;
+	int32 i; /* walks through args array	*/
+	sid32 sidRocksteady;
+	sid32 sidBebop;
+	pri16 priority = 35;
 
-    sidRocksteady = semcreate(0);
-    sidBebop = semcreate(0);
+	sidRocksteady = semcreate(0);
+	sidBebop = semcreate(0);
 
-    pid32 aPID = create(rocksteady, 1024, priority + 5, "Rocksteady", 2, sidRocksteady, sidBebop);
-    pid32 bPID = create(bebop, 1024, priority, "Bebop", 2, sidBebop, sidRocksteady);
+	pid32 aPID = create(rocksteady, 1024, priority + 5, "Rocksteady", 2, sidRocksteady, sidBebop);
+	pid32 bPID = create(bebop, 1024, priority, "Bebop", 2, sidBebop, sidRocksteady);
 
-    return SHELL_OK;
+	return SHELL_OK;
 }
