@@ -33,6 +33,9 @@ shellcmd xsh_footclan(int nargs, char *args[])
 	// 	pri2 = 100 + (rand() % 10);
 	// } while (pri1 == pri2); // while loop makes sure the priorites are not the same.
 
+	pidTurtle = create(turtle, 1024, priority - 30, "Turtles", 0);
+	resume(pidTurtle);
+
 	pidShredder = create(shredder, 1024, priority + 15, "Shredder", 0);
 	pidKrang = create(krang, 1024, priority + 5, "Krang", 0);
 	pidRocksteady = create(rocksteady, 1024, priority, "Rocksteady", 0);
@@ -42,14 +45,11 @@ shellcmd xsh_footclan(int nargs, char *args[])
 	resume(pidRocksteady);
 	resume(pidBebop);
 
-	for (i = 0; i < 100; ++i)
+	for (i = 0; i < 10; ++i)
 	{
 		pidFootsoldier = create(footsoldier, 1024, priority - 10, "footsoldier", 0);
 		resume(pidFootsoldier);
 	}
-
-	pidTurtle = create(turtle, 1024, priority - 25, "Turtle", 0);
-	resume(pidTurtle);
 
 	return SHELL_OK;
 }

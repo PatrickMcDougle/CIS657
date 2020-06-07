@@ -155,6 +155,7 @@ static	void	sysinit(void)
 		prptr->prname[0] = NULLCH;
 		prptr->prstkbase = NULL;
 		prptr->prprio = 0;
+		prptr->last_touched = 0;
 	}
 
 	/* Initialize the Null process entry */

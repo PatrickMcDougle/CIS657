@@ -3,6 +3,8 @@
 #include <xinu.h>
 #include <stdio.h>
 
+#define SLEEP_TIME 2
+
 int16 g_line_current = 0;
 int16 g_line_next = 0;
 
@@ -13,32 +15,16 @@ int16 g_line_next = 0;
 syscall rocksteady()
 {
 	int16 my_line = g_line_next++;
-	char *my_speak = NULL;
-	intmask mask; /* saved interrupt mask		*/
+	char my_name[18];
 
-	while (TRUE)
-	{
-		mask = disable();
+	char *my_frases[] = {
+		"Ooh, I'm gonna enjoy this!                    ",
+		"Hahaha! One smashed up chump, comin' RIGHT up!"};
+	int16 frases_length = 2;
 
-		switch (rand() % 1000)
-		{
-		case 1:
-			my_speak = "Ooh, I'm gonna enjoy this!                    ";
-			break;
-		case 2:
-			my_speak = "Hahaha! One smashed up chump, comin' RIGHT up!";
-			break;
+	sprintf(my_name, "Rocksteady %d", my_line);
 
-		default:
-			my_speak = NULL;
-			break;
-		}
-		print_output(my_line, "Rocksteady", my_speak);
-
-		restore(mask);
-
-		sleepms(1);
-	}
+	continuous_jabber(my_line, my_name, my_frases, frases_length);
 
 	return OK;
 }
@@ -50,32 +36,16 @@ syscall rocksteady()
 syscall bebop()
 {
 	int16 my_line = g_line_next++;
-	char *my_speak = NULL;
-	intmask mask; /* saved interrupt mask		*/
+	char my_name[18];
 
-	while (TRUE)
-	{
-		mask = disable();
+	char *my_frases[] = {
+		"Now we gotcha right where we want ya!",
+		"We got a score to settle!            "};
+	int16 frases_length = 2;
 
-		switch (rand() % 1000)
-		{
-		case 1:
-			my_speak = "Now we gotcha right where we want ya!";
-			break;
-		case 2:
-			my_speak = "We got a score to settle!            ";
-			break;
+	sprintf(my_name, "Bebop %d", my_line);
 
-		default:
-			my_speak = NULL;
-			break;
-		}
-		print_output(my_line, "Bebop", my_speak);
-
-		restore(mask);
-
-		sleepms(1);
-	}
+	continuous_jabber(my_line, my_name, my_frases, frases_length);
 
 	return OK;
 }
@@ -87,32 +57,17 @@ syscall bebop()
 syscall shredder()
 {
 	int16 my_line = g_line_next++;
-	char *my_speak = NULL;
-	intmask mask; /* saved interrupt mask		*/
+	char my_name[18];
 
-	while (TRUE)
-	{
-		mask = disable();
+	char *my_frases[] = {
+		"Destroy them all! Ha ha. Aw it feels so good to be so bad.",
+		"Far from it. Tonight, I dine on turtle soup!              "};
+	int16 frases_length = 2;
 
-		switch (rand() % 1000)
-		{
-		case 1:
-			my_speak = "Destroy them all! Ha ha. Aw it feels so good to be so bad.";
-			break;
-		case 2:
-			my_speak = "Far from it. Tonight, I dine on turtle soup!              ";
-			break;
+	sprintf(my_name, "Shredder %d", my_line);
 
-		default:
-			my_speak = NULL;
-			break;
-		}
-		print_output(my_line, "Shredder", my_speak);
+	continuous_jabber(my_line, my_name, my_frases, frases_length);
 
-		restore(mask);
-
-		sleepms(1);
-	}
 	return OK;
 }
 
@@ -123,35 +78,18 @@ syscall shredder()
 syscall krang()
 {
 	int16 my_line = g_line_next++;
-	char *my_speak = NULL;
-	intmask mask; /* saved interrupt mask		*/
+	char my_name[18];
 
-	while (TRUE)
-	{
-		mask = disable();
+	char *my_frases[] = {
+		"If I had hands I would cover my ears, if I had them!               ",
+		"Sounds like the perfect job for a couple of yo-yos. I made a funny.",
+		"What have you to say now, mini mutants?                            "};
+	int16 frases_length = 3;
 
-		switch (rand() % 1000)
-		{
-		case 1:
-			my_speak = "If I had hands I would cover my ears, if I had them!               ";
-			break;
-		case 2:
-			my_speak = "Sounds like the perfect job for a couple of yo-yos. I made a funny.";
-			break;
-		case 3:
-			my_speak = "What have you to say now, mini mutants?                            ";
-			break;
+	sprintf(my_name, "Krang %d", my_line);
 
-		default:
-			my_speak = NULL;
-			break;
-		}
-		print_output(my_line, "Krang", my_speak);
-
-		restore(mask);
-
-		sleepms(1);
-	}
+	continuous_jabber(my_line, my_name, my_frases, frases_length);
+	
 	return OK;
 }
 
@@ -162,35 +100,17 @@ syscall krang()
 syscall footsoldier()
 {
 	int16 my_line = g_line_next++;
-	char *my_speak = NULL;
-	intmask mask; /* saved interrupt mask		*/
 	char my_name[18];
 
-	fprintf(my_name, "Footsoldier %d", my_line);
+	char *my_frases[] = {
+		"HI YAH!",
+		"Kiai!!!"};
+	int16 frases_length = 2;
 
-	while (TRUE)
-	{
-		mask = disable();
+	sprintf(my_name, "Footsoldier %d", my_line);
 
-		switch (rand() % 5)
-		{
-		case 1:
-			my_speak = "HI YAH!!!";
-			break;
-		case 2:
-			my_speak = "Kiai!!!!!";
-			break;
+	continuous_jabber(my_line, my_name, my_frases, frases_length);
 
-		default:
-			my_speak = NULL;
-			break;
-		}
-		print_output(my_line, &my_name[0], my_speak);
-
-		restore(mask);
-
-		sleepms(1);
-	}
 	return OK;
 }
 
@@ -201,6 +121,23 @@ syscall footsoldier()
 syscall turtle()
 {
 	int16 my_line = g_line_next++;
+
+	char *my_frases[] = {
+		"Cowabunga!  ",
+		"Pizza power!",
+		"Radical!    "};
+	int16 frases_length = 2;
+
+	sleepms(100);
+
+	continuous_jabber(my_line, "Turtles", my_frases, frases_length);
+
+	return OK;
+}
+
+void continuous_jabber(int16 my_line, char *my_name, char *my_frases[], int16 frases_length)
+{
+	int16 i;
 	char *my_speak = NULL;
 	intmask mask; /* saved interrupt mask		*/
 
@@ -208,33 +145,28 @@ syscall turtle()
 	{
 		mask = disable();
 
-		switch (rand() % 3)
+		i = rand() % (frases_length + frases_length + frases_length + frases_length);
+		if (i < frases_length)
 		{
-		case 1:
-			my_speak = "Cowabunga!";
-			break;
-		case 2:
-			my_speak = "Radical!  ";
-			break;
-
-		default:
-			my_speak = NULL;
-			break;
+			my_speak = my_frases[i];
 		}
-		print_output(my_line, "Turtle", my_speak);
+		else
+		{
+			my_speak = NULL;
+		}
+		print_jabber(my_line, my_name, my_speak, getprio(getpid()));
 
 		restore(mask);
 
-		sleepms(1);
-	}
-	return OK;
+		sleepms(SLEEP_TIME);
+	}	
 }
 
 /*------------------------------------------------------------------------
- *  print_output  -  a helper function that works for everyone
+ *  print_jabber  -  a helper function that works for everyone
  *------------------------------------------------------------------------
  */
-void print_output(int16 my_line, char *my_name, char *my_speak)
+void print_jabber(int16 my_line, char *my_name, char *my_speak, pri16 priority)
 {
 	kprintf("%c", 13); // carriage return
 	while (g_line_current < my_line)
@@ -249,10 +181,10 @@ void print_output(int16 my_line, char *my_name, char *my_speak)
 	}
 	if (my_speak != NULL)
 	{
-		kprintf("%14s : %s", my_name, my_speak);
+		kprintf("%14s [%d] %s", my_name, priority, my_speak);
 	}
 	else
 	{
-		kprintf("%14s : ", my_name);
+		kprintf("%14s [%d] ", my_name, priority);
 	}
 }

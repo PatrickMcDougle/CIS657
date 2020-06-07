@@ -61,7 +61,8 @@ extern syscall shredder();
 extern syscall krang();
 extern syscall footsoldier();
 extern syscall turtle();
-extern void print_output(int16, char *, char *);
+extern void continuous_jabber(int16, char *, char *[], int16);
+extern void print_jabber(int16, char *, char *, pri16);
 
 /* in file freebuf.c */
 extern syscall freebuf(char *);
