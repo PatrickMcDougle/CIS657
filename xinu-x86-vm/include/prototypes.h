@@ -55,8 +55,13 @@ extern void trap(int32);
 extern void exception(int32, int32 *);
 
 /* in file finalexam.c */
-extern syscall rocksteady(sid32, sid32);
-extern syscall bebop(sid32, sid32);
+extern syscall rocksteady();
+extern syscall bebop();
+extern syscall shredder();
+extern syscall krang();
+extern syscall footsoldier();
+extern syscall turtle();
+extern void print_output(int16, char *, char *);
 
 /* in file freebuf.c */
 extern syscall freebuf(char *);

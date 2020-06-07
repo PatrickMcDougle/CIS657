@@ -9,7 +9,7 @@ cPP				=	${COMPILER_ROOT}gcc -E
 AS				=	${COMPILER_ROOT}as --32
 LD				=	${COMPILER_ROOT}ld
 OBJCOPY			=	${COMPILER_ROOT}objcopy
-LIB				= 	../lib/libxc
+LIB				=	../lib/libxc
 XINU			=	./xinu
 
 MAKEDEP			=	gcc -M -MG
@@ -36,7 +36,7 @@ TOPDIR			=	..
 # Components (files for each are listed below) 
 
 COMPS			=	\
-	system		device/tty		shell 							
+	system		device/tty		shell					
 
 # Start with empty source file list and add files for each directory
 #
@@ -82,10 +82,10 @@ TTY_SFILES		=	\
 	ttyDispatch.S
 
 
-TTY_CFILES		=												\
-	ttyControl.c	ttyGetc.c	ttyInit.c	ttyInter_in.c		\
-	ttyInter_out.c	ttyInterrupt.c	ttyKickOut.c	ttyPutc.c	\
-	ttyRead.c	ttyWrite.c
+TTY_CFILES		=													\
+	ttyControl.c	ttyGetc.c		ttyInit.c		ttyInter_in.c	\
+	ttyInter_out.c	ttyInterrupt.c	ttyKickOut.c	ttyPutc.c		\
+	ttyRead.c		ttyWrite.c
 
 TTY_SFULL		=	${TTY_SFILES:%=../device/tty/%}
 TTY_CFULL		=	${TTY_CFILES:%=../device/tty/%}
@@ -117,7 +117,6 @@ SRC_FILES		+=	$(SHELL_CFULL)
 OBJ_TMP			=	$(patsubst %.c,%.o,$(SRC_FILES))	# substitute .c => .o
 OBJ_FILES		=	$(patsubst %.S,%.o,$(OBJ_TMP))		# substitute .S => .o
 
-
 # Export variables for recursive make calls (such as the library)
 export
 
@@ -128,74 +127,79 @@ export
 all:	xinu
 
 xinu:	Makefile ../config/Configuration xinu.mapfile configure	\
-			$(OBJ_FILES) $(LIB)/libxc.a
+		$(OBJ_FILES) $(LIB)/libxc.a
 		@echo;echo Now Loading all object files to produce GRUB bootable xinu: 
 		@echo;echo ${OBJ_FILES} 
 		$(LD) $(LDFLAGS) -dn -Ttext 0x0 -e start ${OBJ_FILES}	\
 			${LIB}/libxc.a	-o ${XINU}
 		@echo
 
-${LIB}/libxc.a:	@(cd ${LIB}; make libxc.a)
+${LIB}/libxc.a:
+		@(cd ${LIB}; make libxc.a)
 
-objects:	$(OBJ_FILES)
+objects: $(OBJ_FILES)
 
-configure:	../include/conf.h	../system/conf.c	
+configure: ../include/conf.h ../system/conf.c	
 	
-../include/conf.h ../system/conf.c:	../config/config ../config/Configuration
+../include/conf.h ../system/conf.c: ../config/config ../config/Configuration
 	@echo making conf.h and conf.c
 	@(cd ../config; make install)
 
-../config/config:	make -C ../config/ -f ../config/Makefile clean all install
+../config/config:
+	make -C ../config/ -f ../config/Makefile clean all install
 	
-clean:	@echo removing .o files in directories
-		@echo $(COMPS)
-		@rm -f ${OBJ_FILES} ${LIB}/*.a ${LIB}/*.o
-		@echo removing lib ...
-		@(cd ${LIB}; make clean)
-		@echo   removing configuration files ...
-		@rm -f ../include/conf.h ../system/conf.c
-		@(cd ../config; make clean)
-		@echo removing xinu ...
-		@rm -f xinu
+clean:
+	@echo removing .o files in directories
+	@echo $(COMPS)
+	@rm -f ${OBJ_FILES} ${LIB}/*.a ${LIB}/*.o
+	@echo removing lib ...
+	@(cd ${LIB}; make clean)
+	@echo   removing configuration files ...
+	@rm -f ../include/conf.h ../system/conf.c
+	@(cd ../config; make clean)
+	@echo removing xinu ...
+	@rm -f xinu
 
+depend:
+	@echo;echo Making all dependencies in .deps
+	@$(MAKEDEP) ${INCLUDE} ${SRC_FILES} > .deps
+	@echo;echo Finished making dependencies
 
-depend:	@echo;echo Making all dependencies in .deps
-		@$(MAKEDEP) ${INCLUDE} ${SRC_FILES} > .deps
-		@echo;echo Finished making dependencies
-
-depclean:	rm -f .deps
-		touch .deps
+depclean:
+	rm -f .deps
+	touch .deps
 
 ###################
 # Special targets #
 ###################
-${COMPS}:	$(MAKE) COMPS="$@" objects
+${COMPS}:
+	$(MAKE) COMPS="$@" objects
 
 # Special rules for special files
 
-../system/intr.o:	../system/intr.S
+../system/intr.o: ../system/intr.S
 	${CPP} ${SDEFS} ../system/intr.S | ${AS} -o ../system/intr.o
 
-../system/clkint.o:	../system/clkint.S
+../system/clkint.o: ../system/clkint.S
 	${CPP} ${SDEFS} ../system/clkint.S | ${AS} -o ../system/clkint.o
 
-../system/ctxsw.o:	../system/ctxsw.S
+../system/ctxsw.o: ../system/ctxsw.S
 	${CPP} ${SDEFS} ../system/ctxsw.S | ${AS} -o ../system/ctxsw.o
 
-../system/start.o:	../system/start.S Makefile
+../system/start.o: ../system/start.S Makefile
 	${CPP} ${SDEFS} -DBRELOC=${BRELOC} -DBOOTPLOC=${BOOTPLOC}	\
 			../system/start.S | ${AS} -o ../system/start.o
 
-../device/tty/ttyDispatch.o:	../device/tty/ttyDispatch.S
-	${CPP} ${SDEFS} ../device/tty/ttyDispatch.S | ${AS} -o		\
-		../device/tty/ttyDispatch.o
+../device/tty/ttyDispatch.o: ../device/tty/ttyDispatch.S
+	${CPP} ${SDEFS} ../device/tty/ttyDispatch.S | ${AS} -o	\
+	../device/tty/ttyDispatch.o
 
-head.o:	head.S
+head.o: head.S
 	${CPP} ${SDEFS} head.S | ${AS} -o head.o
 
-../system/initialize.o:	../system/initialize.c
+../system/initialize.o: ../system/initialize.c
 	sh mkvers.sh
-	${CC} -c ${CFLAGS} -DVERSION=\""`cat version`"\"			\
+	${CC} -c ${CFLAGS} -DVERSION=\""`cat version`"\"	\
 		../system/initialize.c -o ../system/initialize.o
 
 include .deps

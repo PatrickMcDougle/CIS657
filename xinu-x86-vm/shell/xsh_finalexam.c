@@ -12,13 +12,44 @@ shellcmd xsh_footclan(int nargs, char *args[])
 	int32 i; /* walks through args array	*/
 	sid32 sidRocksteady;
 	sid32 sidBebop;
-	pri16 priority = 35;
+	pri16 priority = 50;
+
+	pid32 pidRocksteady;
+	pid32 pidBebop;
+	pid32 pidShredder;
+	pid32 pidKrang;
+	pid32 pidFootsoldier;
+	pid32 pidTurtle;
 
 	sidRocksteady = semcreate(0);
 	sidBebop = semcreate(0);
 
-	pid32 aPID = create(rocksteady, 1024, priority + 5, "Rocksteady", 2, sidRocksteady, sidBebop);
-	pid32 bPID = create(bebop, 1024, priority, "Bebop", 2, sidBebop, sidRocksteady);
+	// // generate two process priority values that are different from each other.
+	// int32 pri1;
+	// int32 pri2;
+	// pri1 = 100 + (rand() % 10);
+	// do
+	// {
+	// 	pri2 = 100 + (rand() % 10);
+	// } while (pri1 == pri2); // while loop makes sure the priorites are not the same.
+
+	pidShredder = create(shredder, 1024, priority + 15, "Shredder", 0);
+	pidKrang = create(krang, 1024, priority + 5, "Krang", 0);
+	pidRocksteady = create(rocksteady, 1024, priority, "Rocksteady", 0);
+	pidBebop = create(bebop, 1024, priority - 5, "Bebop", 0);
+	resume(pidShredder);
+	resume(pidKrang);
+	resume(pidRocksteady);
+	resume(pidBebop);
+
+	for (i = 0; i < 100; ++i)
+	{
+		pidFootsoldier = create(footsoldier, 1024, priority - 10, "footsoldier", 0);
+		resume(pidFootsoldier);
+	}
+
+	pidTurtle = create(turtle, 1024, priority - 25, "Turtle", 0);
+	resume(pidTurtle);
 
 	return SHELL_OK;
 }
