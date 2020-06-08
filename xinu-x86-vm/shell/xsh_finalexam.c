@@ -2,6 +2,7 @@
 
 #include <xinu.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /*------------------------------------------------------------------------
  * xsh_footclan - Starts two processes with high priority.
@@ -50,6 +51,39 @@ shellcmd xsh_footclan(int nargs, char *args[])
 		pidFootsoldier = create(footsoldier, 1024, priority - 10, "footsoldier", 0);
 		resume(pidFootsoldier);
 	}
+
+	return SHELL_OK;
+}
+
+shellcmd xsh_tmnt(int nargs, char *args[])
+{
+	int32 i;
+	pri16 priority = 50;
+	char *turtle_names[] = {
+		"Leonardo",
+		"Donatello",
+		"Michelangelo",
+		"Raphael"};
+
+	char *the_name;
+
+	resume(create(footsoldier2, 1024, priority, "Rocksteady", 1, "Rocksteady"));
+	resume(create(footsoldier2, 1024, priority - 5, "Bebop", 1, "Bebop"));
+
+	for (i = 1; i < 5; ++i)
+	{
+		the_name = getmem(sizeof(char) * PNMLEN);
+		sprintf(the_name, "FootSoldier %d", i);
+		// kprintf("name : %s\n", the_name);
+		resume(create(footsoldier2, 1024, priority - 10, the_name, 1, the_name));
+	}
+
+	the_name = getmem(sizeof(char) * PNMLEN);
+	sprintf(the_name, "%-*s", PNMLEN, turtle_names[rand() % 4]);
+	resume(create(turtle2, 1024, priority - 25, the_name, 1, the_name));
+
+	resume(create(print_process, 1024, 400, "TMNT", 0));
+	// resume();
 
 	return SHELL_OK;
 }

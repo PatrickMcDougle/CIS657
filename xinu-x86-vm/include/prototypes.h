@@ -55,14 +55,18 @@ extern void trap(int32);
 extern void exception(int32, int32 *);
 
 /* in file finalexam.c */
-extern syscall rocksteady();
-extern syscall bebop();
-extern syscall shredder();
-extern syscall krang();
-extern syscall footsoldier();
-extern syscall turtle();
+extern syscall rocksteady(char *);
+extern syscall bebop(char *);
+extern syscall shredder(char *);
+extern syscall krang(char *);
+extern syscall footsoldier(char *);
+extern syscall turtle(char *);
 extern void continuous_jabber(int16, char *, char *[], int16);
 extern void print_jabber(int16, char *, char *, pri16);
+extern syscall print_process();
+extern syscall footsoldier2(char *);
+extern syscall turtle2(char *);
+extern void continuous_fight(char *);
 
 /* in file freebuf.c */
 extern syscall freebuf(char *);
