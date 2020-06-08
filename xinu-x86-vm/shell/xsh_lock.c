@@ -27,22 +27,27 @@ shellcmd xsh_lock(int nargs, char *args[])
 	{
 		printf("Usage: %s (-u | -l [-c] [-C] [-n] [-w] [-s] [-i]) [-v] <RS>+ \n\n", args[0]);
 		printf("Description:\n");
-		printf("\tEncrypts the system.  Echo and print are all encrypted.\n");
+		printf("  Encrypts the system.  Echo and print are all encrypted.\n");
 		printf("Options:\n");
-		printf("\t-c \tLower Case: \tEncrypt lower case characters.\n");
-		printf("\t-C \tUpper Case: \tEncrypt upper case characters.\n");
-		printf("\t-i \tReset: \tReset the rotor values to the inital start position.\n");
-		printf("\t-l \tLock: \t\tTurns on the encryption.  Need one other flag.\n");
-		printf("\t-n \tNumbers: \tEncrypt number characters.\n");
-		printf("\t-s \tSymbols: \tEncrypt symbols found on the keyboard.\n");
-		printf("\t-u \tUnlock: \tTurns off the encryption.\n");
-		printf("\t-v \tVerbose: \tTurns on verbose mode and print stuff to standard output.\n");
-		printf("\t-w \tWhite Space: \tEncrypt white space, like newline, tab, space.\n");
-		printf("\t<RS> \tRotorSettings: \t<Sch>,<Mix>,<Srt>. need at least one (1) set and no more then nine (9) sets.\n");
-		printf("\t<Sch> \tSchema: \tValue between 1-5.  This value defines the encryption schema of the Rotor.\n");
-		printf("\t<Mix> \tMixer:  \tValue between 0-255.  This value defines the Mix value for the schema.\n");
-		printf("\t<Srt> \tStart:  \tValue between 0-255.  This value defines the starting position of the Rotor.\n");
-		printf("\t--help \t\t\tDisplay this help and exit\n");
+		printf("  -c \tLower Case: \tEncrypt lower case characters.\n");
+		printf("  -C \tUpper Case: \tEncrypt upper case characters.\n");
+		printf("  -i \tReset: \t\tReset the rotor values to the inital start position.\n");
+		printf("  -l \tLock: \t\tTurns on the encryption.  Need one other flag.\n");
+		printf("  -n \tNumbers: \tEncrypt number characters.\n");
+		printf("  -s \tSymbols: \tEncrypt symbols found on the keyboard.\n");
+		printf("  -u \tUnlock: \tTurns off the encryption.\n");
+		printf("  -v \tVerbose: \tTurns on verbose mode and print stuff to standard \n");
+		printf("  \t\t\t output.\n");
+		printf("  -w \tWhite Space: \tEncrypt white space, like newline, tab, space.\n");
+		printf("  <RS> \tRotorSettings: \t<Sch>,<Mix>,<Srt>. need at least one (1) set and no \n");
+		printf("  \t\t\t more then nine (9) sets.\n");
+		printf("  <Sch>\tSchema: \tValue between 1-5.  This value defines the encryption \n");
+		printf("  \t\t\t schema of the Rotor.\n");
+		printf("  <Mix>\tMixer:  \tValue between 0-255.  This value defines the Mix value \n");
+		printf("  \t\t\t for the schema.\n");
+		printf("  <Srt>\tStart:  \tValue between 0-255.  This value defines the starting \n");
+		printf("  \t\t\t position of the Rotor.\n");
+		printf("  --help\t\tDisplay this help and exit\n");
 		return OK;
 	}
 
@@ -127,11 +132,13 @@ shellcmd xsh_lock(int nargs, char *args[])
 		if (i < g_enigma_encrypt_char_count && shouldEncryptSymbols(encryptInputSettings))
 		{
 			++reflector_shift;
-			for (k = 0; k < 15; ++k)
+			g_enigma_encrypt_chars[i++] = '!';
+
+			for (k = 0; k < 13; ++k)
 			{
-				g_enigma_encrypt_chars[i + k] = '!' + k;
+				g_enigma_encrypt_chars[i + k] = '#' + k;
 			}
-			i += 15;
+			i += 13;
 			for (k = 0; k < 7; ++k)
 			{
 				g_enigma_encrypt_chars[i + k] = ':' + k;
@@ -168,9 +175,10 @@ shellcmd xsh_lock(int nargs, char *args[])
 				rotor_setup_type_3(rotor_set, g_enigma_rotor_settings[i].shift);
 				break;
 			case 4:
-				++reflector_shift;
-				rotor_setup_type_4(rotor_set, g_enigma_rotor_settings[i].shift);
-				break;
+			// TODO: @Patrick | ROTOR 4 NOT WORKING IN ALL CASES.
+			// ++reflector_shift;
+			// rotor_setup_type_4(rotor_set, g_enigma_rotor_settings[i].shift);
+			// break;
 			case 5:
 				++reflector_shift;
 				rotor_setup_type_5(rotor_set, g_enigma_rotor_settings[i].shift);
