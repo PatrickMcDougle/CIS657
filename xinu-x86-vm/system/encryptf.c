@@ -120,7 +120,7 @@ int32 encryptForwardRotors(int32 val, bool8 verbose)
 
 		if (verbose == TRUE)
 		{
-			kprintf(" %d", val);
+			kprintf(" %2d", val);
 		}
 	}
 
@@ -146,7 +146,7 @@ int32 encryptBackwardRotors(int32 val, bool8 verbose)
 
 		if (verbose == TRUE)
 		{
-			kprintf(" %d", val);
+			kprintf(" %2d", val);
 		}
 	}
 
@@ -159,7 +159,7 @@ int32 encryptReflector(int32 val, bool8 verbose)
 
 	if (verbose == TRUE)
 	{
-		kprintf(" |%d|", val);
+		kprintf(" |%2d|", val);
 	}
 
 	return val;
@@ -185,7 +185,7 @@ int32 findCharInEncryptionList(char ch, bool8 verbose)
 
 	if (verbose == TRUE)
 	{
-		kprintf(" [%c:%d]", ch, i);
+		kprintf(" [%c:%2d]", ch, i);
 	}
 
 	return i;
