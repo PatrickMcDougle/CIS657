@@ -1,4 +1,4 @@
-/* finalexam.c - rocksteady, bebop, turtle */
+/* finalexam.c - footsoldier, turtle, continuous_fight, print_process */
 
 #include <xinu.h>
 #include <stdio.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define SLEEP_TIME_FIGHT 2000
-#define SLEEP_TIME_PRINT 200
+#define SLEEP_TIME_PRINT 500
 #define SETUP_SLEEP_TIME 300
 
 int16 g_line_current = 0;
@@ -17,169 +17,106 @@ uint8 g_starvation_setting = 0;
 uint8 g_starvation_seconds = 10;
 uint8 g_starvation_increment = 1;
 
-/*------------------------------------------------------------------------
- *  rocksteady  -  a Rhino Mutant for the footclan
- *------------------------------------------------------------------------
- */
-syscall rocksteady(char *my_name)
-{
-	int16 my_line = g_line_next++;
-
-	char *my_frases[] = {
-		"Ooh, I'm gonna enjoy this!                    ",
-		"Hahaha! One smashed up chump, comin' RIGHT up!"};
-	int16 frases_length = 2;
-
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
-
-	return OK;
-}
+int8 g_total_clan_membership = 0;
+int8 g_total_clan_sleeping = 0;
 
 /*------------------------------------------------------------------------
- *  bebop  -  a Warthog Mutant for the footclan
- *------------------------------------------------------------------------
- */
-syscall bebop(char *my_name)
-{
-	int16 my_line = g_line_next++;
-
-	char *my_frases[] = {
-		"Now we gotcha right where we want ya!",
-		"We got a score to settle!            "};
-	int16 frases_length = 2;
-
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
-
-	return OK;
-}
-
-/*------------------------------------------------------------------------
- *  shredder  -  The leader of the footclan
- *------------------------------------------------------------------------
- */
-syscall shredder(char *my_name)
-{
-	int16 my_line = g_line_next++;
-
-	char *my_frases[] = {
-		"Destroy them all! Ha ha. Aw it feels so good to be so bad.",
-		"Far from it. Tonight, I dine on turtle soup!              "};
-	int16 frases_length = 2;
-
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
-
-	return OK;
-}
-
-/*------------------------------------------------------------------------
- *  krang  -  a being from Demension X
- *------------------------------------------------------------------------
- */
-syscall krang(char *my_name)
-{
-	int16 my_line = g_line_next++;
-
-	char *my_frases[] = {
-		"If I had hands I would cover my ears, if I had them!               ",
-		"Sounds like the perfect job for a couple of yo-yos. I made a funny.",
-		"What have you to say now, mini mutants?                            "};
-	int16 frases_length = 3;
-
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
-
-	return OK;
-}
-
-/*------------------------------------------------------------------------
- *  footsoldier  -  a robot ninja.
+ *  footsoldier  -  a robot ninja. (resource hog)
  *------------------------------------------------------------------------
  */
 syscall footsoldier(char *my_name)
 {
-	int16 my_line = g_line_next++;
+	// increment membership.
+	++g_total_clan_membership;
 
-	char *my_frases[] = {
-		"HI YAH!",
-		"Kiai!!!"};
-	int16 frases_length = 2;
+	sleepms(SETUP_SLEEP_TIME);
 
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
+	continuous_fight(my_name);
 
 	return OK;
 }
 
 /*------------------------------------------------------------------------
- *  turtle  -  a Turtle Mutant that is starving.
+ *  turtle  -  A Teenage Mutent Ninja Turtle (starvation process)
  *------------------------------------------------------------------------
  */
 syscall turtle(char *my_name)
 {
-	int16 my_line = g_line_next++;
+	sleepms(SETUP_SLEEP_TIME);
+	intmask mask; /* saved interrupt mask		*/
 
-	char *my_frases[] = {
-		"Cowabunga!  ",
-		"Pizza power!",
-		"Radical!    "};
-	int16 frases_length = 2;
+	mask = disable();
+	kprintf("\n");
+	kprintf("	              ,;;;!!;;\n");
+	kprintf("        ,;<!!!!!!!!!!!;\n");
+	kprintf("     `'<!!!!!!!!!!(``'!!\n");
+	kprintf("           ,;;;;;;, `\\. `\\         .,c$$$$$$$$$$$$$ec,.\n");
+	kprintf("      ,;;!!!!!!!!!!!>; `. ,;!>> .e$$$$$$$$\"\".  \"?$$$$$$$e.\n");
+	kprintf(" <:<!!!!!!!!'` ..,,,.`` ,!!!' ;,(?\"\"\"\"\"\"\";!!''<; `?$$$$$$PF ,;,\n");
+	kprintf("  `'!!!!;;;;;;;;<!'''`  !!! ;,`'``''!!!;!!!!`..`!;  ,,,  .<!''`).\n");
+	kprintf("     ```'''''``         `!  `!!!!><;;;!!!!! J$$b,`!>;!!:!!`,d?b`!>\n");
+	kprintf("                          `'-;,(<!!!!!!!!!> $F   )...:!.  d\"  3 !>\n");
+	kprintf("                              ```````''<!!!- \"=-='     .  `--=\",!>\n");
+	kprintf("                         .ze$$$$$$$$$er  .,cd$$$$$$$$$$$$$$$$bc.'\n");
+	kprintf("                      .e$$$$$$$$$$$$$$,$$$$$$$$$$$$$$$$$$$$$$$$$$.\n");
+	kprintf("                     z$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$c .\n");
+	kprintf("                    J$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$c\n");
+	kprintf("                    $$$$$$$$$$$$$$P\"`?$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$b\n");
+	kprintf("                    $$$$$$$$$$$$$$ dbc `\"\"?$$$$$$$$$$$$$$$$$$$$$$?$$$$$$$c\n");
+	kprintf("                    ?$$$$$$$$$$$$$$$$$$c.      \"\"\"\"????????\"\"\"\" c$$$$$$$$P\n");
+	kprintf("         .,,.        \"$$$$$$$$$$$$$$$$$$$$c.   ._              J$$$$$$$$$\n");
+	kprintf(" .,,cc$$$$$$$$$bec,.  `?$$$$$$$$$$$$$$$$$$$$$c.```%%%%%%%%,%%%%%%,   c$$$$$$$$P\"\n");
+	kprintf("$$$$$$$$$$$$$$$$$$$$$$c  \"\"?$$$$$$$$$$$$$$$$$$$$$bc,,.`` .,,c$$$$$$$P\"\",cb\n");
+	kprintf("$$$$$$$$$$$$$$$$$$$$$$$b bc,.\"\"??$$$$$$$$$$$$$$FF\"\"?????\"\",J$$$$$P\" ,zd$$$\n");
+	kprintf("$$$$$$$$$$$$$$$$$$$$$$$$ ?$???%%   `\"\"??$$$$$$$$$$$$bcucd$$$P\"\"\"  ==$$$$$$$\n");
+	kprintf("$$$$$$$$$$$$$$$$$$$$$$$P\" ,;;;<!!!!!>;;,. `\"\"\"\"??????\"\"  ,;;;;;;;;;, `\"?$$\n");
+	kprintf("$$$$$$$$$$$$$$$$$$$P\"\",;!!!!!!!!!!!!!!!!!!!!!!!;;;;;;!!!!!!!!!!!!!!!!!;  \"\n");
+	kprintf("$$$$$$$$$$$$$$$$$\"\",;!!!!!!'``.,,,,,.```''!!!!!!!!!!!!!!!!!!!!'''''!!!!!>\n");
+	kprintf("$$$$$$$$$$$$$$$\" ;!!!!!'`.z$$$$$$$$$$$$$ec,. ```'''''''``` .,,ccecec,`'!!!\n");
+	kprintf("$$$$$$$$$$$$$\" ;!!!!' .c$$$$$$$$$$$$$$$$$$$$$$$c  :: .c$$$$$$$$$$$$$$$. <!\n");
+	kprintf("$$$$$$$$$$$\" ;!!!!' .d$$$$$$$$$$$$$$$$$$$$$$$$$$b ' z$$$$$$$$$$$$$$$$$$c <\n");
+	kprintf("$$$$$$$$$F  <!!!'.c$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$b  $$$$$$$$$$$$$$$$$$$$r\n");
+	kprintf("$$$$$$$P\" <!!!' c$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$, \"$$$$$$$$$$$$$$$$$$$$\n");
+	kprintf("$$$$$P\" ;!!!' z$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$\n");
+	kprintf("\n");
 
-	sleepms(100);
+	int16 i;
+	for (i = 0; i < 33; ++i)
+	{
+		kprintf("%c", 11); // vertical tab
+	}
 
-	continuous_jabber(my_line, my_name, my_frases, frases_length);
+	restore(mask);
+
+	continuous_fight(my_name);
 
 	return OK;
 }
 
-void continuous_jabber(int16 my_line, char *my_name, char *my_frases[], int16 frases_length)
+/*------------------------------------------------------------------------
+ *  continuous_fight  -  continue to use resources and sleep every 
+ *    so often
+ *------------------------------------------------------------------------
+ */
+void continuous_fight(char *my_name)
 {
-	int16 i;
-	char *my_speak = NULL;
 	intmask mask; /* saved interrupt mask		*/
 
 	while (TRUE)
 	{
 		mask = disable();
 
-		i = rand() % (frases_length + frases_length + frases_length + frases_length);
-		if (i < frases_length)
+		if (g_total_clan_membership == 1 || g_total_clan_membership - 1 > g_total_clan_sleeping)
 		{
-			my_speak = my_frases[i];
+			++g_total_clan_sleeping;
+			restore(mask);
+			sleepms(SLEEP_TIME_FIGHT + ((rand() % 10) * 1000));
+			--g_total_clan_sleeping;
 		}
 		else
 		{
-			my_speak = NULL;
+			restore(mask);
 		}
-		print_jabber(my_line, my_name, my_speak, getprio(getpid()));
-
-		restore(mask);
-
-		sleepms(SLEEP_TIME_FIGHT);
-	}
-}
-
-/*------------------------------------------------------------------------
- *  print_jabber  -  a helper function that works for everyone
- *------------------------------------------------------------------------
- */
-void print_jabber(int16 my_line, char *my_name, char *my_speak, pri16 priority)
-{
-	kprintf("%c", 13); // carriage return
-	while (g_line_current < my_line)
-	{
-		kprintf("%c", 10); // line feed
-		++g_line_current;
-	}
-	while (g_line_current > my_line)
-	{
-		kprintf("%c", 11); // vertical tab
-		--g_line_current;
-	}
-	if (my_speak != NULL)
-	{
-		kprintf("%14s [%d] %s", my_name, priority, my_speak);
-	}
-	else
-	{
-		kprintf("%14s [%d] ", my_name, priority);
 	}
 }
 
@@ -253,106 +190,7 @@ syscall print_process()
 			++count;
 		}
 
-		// for (i = 0; i < NQENT; ++i)
-		// {
-		// 	kprintf(" Q [%d|%d|%d]\n", queuetab[i].qprev, queuetab[i].qkey, queuetab[i].qnext);
-		// }
-
 		sleepms(SLEEP_TIME_PRINT);
 	}
-	return OK;
-}
-
-int8 g_total_clan_membership = 0;
-int8 g_total_clan_sleeping = 0;
-
-/*------------------------------------------------------------------------
- *  footsoldier2  -  a robot ninja.
- *------------------------------------------------------------------------
- */
-syscall footsoldier2(char *my_name)
-{
-	// increment membership.
-	++g_total_clan_membership;
-
-	sleepms(SETUP_SLEEP_TIME);
-
-	continuous_fight(my_name);
-
-	return OK;
-}
-
-void continuous_fight(char *my_name)
-{
-	intmask mask; /* saved interrupt mask		*/
-
-	while (TRUE)
-	{
-		mask = disable();
-
-		if (g_total_clan_membership == 1 || g_total_clan_membership - 1 > g_total_clan_sleeping)
-		{
-			++g_total_clan_sleeping;
-			restore(mask);
-			sleepms(SLEEP_TIME_FIGHT + ((rand() % 10) * 100));
-			--g_total_clan_sleeping;
-		}
-		else
-		{
-			restore(mask);
-		}
-	}
-}
-
-syscall turtle2(char *my_name)
-{
-	sleepms(SETUP_SLEEP_TIME);
-
-	intmask mask; /* saved interrupt mask		*/
-	mask = disable();
-	kprintf("\n");
-	kprintf("	              ,;;;!!;;\n");
-	kprintf("        ,;<!!!!!!!!!!!;\n");
-	kprintf("     `'<!!!!!!!!!!(``'!!\n");
-	kprintf("           ,;;;;;;, `\\. `\\         .,c$$$$$$$$$$$$$ec,.\n");
-	kprintf("      ,;;!!!!!!!!!!!>; `. ,;!>> .e$$$$$$$$\"\".  \"?$$$$$$$e.\n");
-	kprintf(" <:<!!!!!!!!'` ..,,,.`` ,!!!' ;,(?\"\"\"\"\"\"\";!!''<; `?$$$$$$PF ,;,\n");
-	kprintf("  `'!!!!;;;;;;;;<!'''`  !!! ;,`'``''!!!;!!!!`..`!;  ,,,  .<!''`).\n");
-	kprintf("     ```'''''``         `!  `!!!!><;;;!!!!! J$$b,`!>;!!:!!`,d?b`!>\n");
-	kprintf("                          `'-;,(<!!!!!!!!!> $F   )...:!.  d\"  3 !>\n");
-	kprintf("                              ```````''<!!!- \"=-='     .  `--=\",!>\n");
-	kprintf("                         .ze$$$$$$$$$er  .,cd$$$$$$$$$$$$$$$$bc.'\n");
-	kprintf("                      .e$$$$$$$$$$$$$$,$$$$$$$$$$$$$$$$$$$$$$$$$$.\n");
-	kprintf("                     z$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$c .\n");
-	kprintf("                    J$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$c\n");
-	kprintf("                    $$$$$$$$$$$$$$P\"`?$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$b\n");
-	kprintf("                    $$$$$$$$$$$$$$ dbc `\"\"?$$$$$$$$$$$$$$$$$$$$$$?$$$$$$$c\n");
-	kprintf("                    ?$$$$$$$$$$$$$$$$$$c.      \"\"\"\"????????\"\"\"\" c$$$$$$$$P\n");
-	kprintf("         .,,.        \"$$$$$$$$$$$$$$$$$$$$c.   ._              J$$$$$$$$$\n");
-	kprintf(" .,,cc$$$$$$$$$bec,.  `?$$$$$$$$$$$$$$$$$$$$$c.```%%%%%%%%,%%%%%%,   c$$$$$$$$P\"\n");
-	kprintf("$$$$$$$$$$$$$$$$$$$$$$c  \"\"?$$$$$$$$$$$$$$$$$$$$$bc,,.`` .,,c$$$$$$$P\"\",cb\n");
-	kprintf("$$$$$$$$$$$$$$$$$$$$$$$b bc,.\"\"??$$$$$$$$$$$$$$FF\"\"?????\"\",J$$$$$P\" ,zd$$$\n");
-	kprintf("$$$$$$$$$$$$$$$$$$$$$$$$ ?$???%%   `\"\"??$$$$$$$$$$$$bcucd$$$P\"\"\"  ==$$$$$$$\n");
-	kprintf("$$$$$$$$$$$$$$$$$$$$$$$P\" ,;;;<!!!!!>;;,. `\"\"\"\"??????\"\"  ,;;;;;;;;;, `\"?$$\n");
-	kprintf("$$$$$$$$$$$$$$$$$$$P\"\",;!!!!!!!!!!!!!!!!!!!!!!!;;;;;;!!!!!!!!!!!!!!!!!;  \"\n");
-	kprintf("$$$$$$$$$$$$$$$$$\"\",;!!!!!!'``.,,,,,.```''!!!!!!!!!!!!!!!!!!!!'''''!!!!!>\n");
-	kprintf("$$$$$$$$$$$$$$$\" ;!!!!!'`.z$$$$$$$$$$$$$ec,. ```'''''''``` .,,ccecec,`'!!!\n");
-	kprintf("$$$$$$$$$$$$$\" ;!!!!' .c$$$$$$$$$$$$$$$$$$$$$$$c  :: .c$$$$$$$$$$$$$$$. <!\n");
-	kprintf("$$$$$$$$$$$\" ;!!!!' .d$$$$$$$$$$$$$$$$$$$$$$$$$$b ' z$$$$$$$$$$$$$$$$$$c <\n");
-	kprintf("$$$$$$$$$F  <!!!'.c$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$b  $$$$$$$$$$$$$$$$$$$$r\n");
-	kprintf("$$$$$$$P\" <!!!' c$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$, \"$$$$$$$$$$$$$$$$$$$$\n");
-	kprintf("$$$$$P\" ;!!!' z$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$\n");
-	kprintf("\n");
-
-	int16 i;
-	for (i = 0; i < 33; ++i)
-	{
-		kprintf("%c", 11); // vertical tab
-	}
-
-	restore(mask);
-
-	continuous_fight(my_name);
-
 	return OK;
 }

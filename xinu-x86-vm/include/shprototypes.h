@@ -26,7 +26,6 @@ extern shellcmd xsh_ethstat(int32, char *[]);
 extern shellcmd xsh_exit(int32, char *[]);
 
 /* in file xsh_finalexam.c */
-extern shellcmd xsh_footclan(int32, char *[]);
 extern shellcmd xsh_tmnt(int32, char *[]);
 extern shellcmd xsh_starve(int32, char *[]);
 
