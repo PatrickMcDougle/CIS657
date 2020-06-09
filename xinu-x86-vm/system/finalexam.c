@@ -12,6 +12,11 @@
 int16 g_line_current = 0;
 int16 g_line_next = 0;
 
+// global setting for starvation.
+uint8 g_starvation_setting = 0;
+uint8 g_starvation_seconds = 10;
+uint8 g_starvation_increment = 1;
+
 /*------------------------------------------------------------------------
  *  rocksteady  -  a Rhino Mutant for the footclan
  *------------------------------------------------------------------------
