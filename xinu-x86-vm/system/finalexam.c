@@ -1,4 +1,10 @@
-/* finalexam.c - footsoldier, turtle, continuous_fight, print_process */
+/* finalexam.c - 
+ *		footsoldier
+ *		turtle
+ *		continuous_fight
+ *		print_process
+ *		starvation_check
+ * */
 
 #include <xinu.h>
 #include <stdio.h>
@@ -9,9 +15,10 @@
  *  global setting for starvation.
  *------------------------------------------------------------------------
  */
-uint8 g_starvation_setting = 0;	  /* */
-uint8 g_starvation_seconds = 10;  /* */
-uint8 g_starvation_increment = 1; /* */
+uint8 g_starvation_setting = 0;			/* which starvation fix will be used.	*/
+uint8 g_starvation_seconds = 10;		/* how long will starvation go for.		*/
+uint8 g_starvation_increment = 1;		/* how much should priority increase.	*/
+uint8 g_is_starvation_checking = FALSE; /* keep time checking for starvation.	*/
 
 /*------------------------------------------------------------------------
  *  global values for only this file.
@@ -29,23 +36,30 @@ syscall footsoldier(char *my_name)
 	// increment membership.
 	++g_total_clan_membership;
 
+	// let the process sleep so that other process can start up.
 	sleepms(SETUP_SLEEP_TIME);
 
+	// start being a resource hog!
 	continuous_fight(my_name);
 
 	return OK;
 }
 
 /*------------------------------------------------------------------------
- *  turtle  -  A Teenage Mutent Ninja Turtle (starvation process)
+ *  turtle  -  A Teenage Mutant Ninja Turtle (starvation process)
  *------------------------------------------------------------------------
  */
 syscall turtle(char *my_name)
 {
+	// let the process sleep so that other process can start up.
 	sleepms(SETUP_SLEEP_TIME);
+
 	intmask mask; /* saved interrupt mask		*/
 
+	// going to print out a lot of info, so lets disable interupts
 	mask = disable();
+
+	// print a nice image of a Teenage Mutant Ninja Turtle.
 	kprintf("\n");
 	kprintf("	              ,;;;!!;;\n");
 	kprintf("        ,;<!!!!!!!!!!!;\n");
@@ -80,14 +94,17 @@ syscall turtle(char *my_name)
 	kprintf("$$$$$P\" ;!!!' z$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$\n");
 	kprintf("\n");
 
+	// move mouse pointer back to the top of the image.
 	int16 i;
 	for (i = 0; i < 33; ++i)
 	{
 		kprintf("%c", 11); // vertical tab
 	}
 
+	// done printing so restore interupts!
 	restore(mask);
 
+	// join the fight and be a resource hog!
 	continuous_fight(my_name);
 
 	return OK;
@@ -101,27 +118,41 @@ syscall turtle(char *my_name)
 void continuous_fight(char *my_name)
 {
 	intmask mask; /* saved interrupt mask		*/
+	int32 half_sleep_time_fight = SLEEP_TIME_FIGHT / 2;
 
+	// continue to use resources
 	while (TRUE)
 	{
+		// disable interupts to make sure things are calculated correctly
 		mask = disable();
 
+		// if there is only one member in the clan
+		// or there is more than one clan member hogging resources
+		// sleep!
 		if (g_total_clan_membership == 1 || g_total_clan_membership - 1 > g_total_clan_sleeping)
 		{
+			// update the number of clan members who are sleeping.
 			++g_total_clan_sleeping;
+
+			// turn back on interupts.
 			restore(mask);
-			sleepms(SLEEP_TIME_FIGHT + ((rand() % 10) * 1000));
+
+			// sleep for 100% to 150% of the default sleep milliseconds.
+			sleepms(SLEEP_TIME_FIGHT + (rand() % half_sleep_time_fight));
+
+			// this process is done sleeping.
 			--g_total_clan_sleeping;
 		}
 		else
 		{
+			// turn back on interupts.
 			restore(mask);
 		}
 	}
 }
 
 /*------------------------------------------------------------------------
- *  print_jabber  -  a helper function that works for everyone
+ *  print_process  -  A process that prints out the process info.
  *------------------------------------------------------------------------
  */
 syscall print_process()
@@ -139,29 +170,33 @@ syscall print_process()
 
 	kprintf("%c", 13); // carriage return
 
-	kprintf("%3s %-16s %4s %10s state  QK\n",
+	kprintf("%3s %-16s %4s %10s %5s %4s \n",
 			"Pid",
 			"Name",
 			"Prio",
-			"Last Touch");
+			"Last Touch",
+			"state",
+			" QK ");
 
-	kprintf("%3s %-16s %4s %10s ----- ----\n",
+	kprintf("%3s %-16s %4s %10s %5s %4s \n",
 			"---",
 			"----------------",
 			"----",
-			"----------");
+			"----------",
+			"-----",
+			"----");
 
+	// keep printing the table data over and over.
 	while (TRUE)
 	{
-		kprintf("%c", 10); // line feed
+		// place the curser to the top of the table data area.
 		while (count > 0)
 		{
 			--count;
 			kprintf("%c", 11); // vertical tab
 		}
 
-		++count;
-
+		// go through the process table and look for prosses to present
 		for (i = 3; i < NPROC; ++i)
 		{
 			prptr = &proctab[i];
@@ -180,29 +215,43 @@ syscall print_process()
 				// don't print the fun output stuff for this assignment
 				continue;
 			}
-			kprintf("%3d %-16s %4d %10d %s %d\n",
+
+			// output a row of information for this process.
+			kprintf("%3d %-16s %4d %10d %5s %4d\n",
 					i,
 					prptr->prname,
 					prptr->prprio,
 					prptr->last_touched,
 					pstate[(int)prptr->prstate],
 					queuetab[i].qkey);
+
+			// count the number of lines we are adding.
 			++count;
 		}
 
+		// sleep this process so that other processes may run
+		// no need to be a resource hog!
 		sleepms(SLEEP_TIME_PRINT);
 	}
+
 	return OK;
 }
 
+/*------------------------------------------------------------------------
+ *  starvation_check  -  A process checks for starvation.
+ *------------------------------------------------------------------------
+ */
 syscall starvation_check(void)
 {
-	while (TRUE)
+	// always check for starvation.
+	while (g_is_starvation_checking)
 	{
-		// sleep for 2 seconds then check if a process is starving.
-		sleep(2);
+		// sleep for 2 seconds (2000 milliseconds).
+		sleepms(SLEEP_TIME_CHECK);
 
+		// Check if any processes are starving.
 		resched_starvation_check(g_starvation_seconds, g_starvation_increment);
 	}
+
 	return OK;
 }

@@ -47,6 +47,7 @@ void resched(void) /* assumes interrupts are disabled	*/
 		insert(currpid, readylist, ptold->prprio);
 	}
 
+	// if we are checking durring context switch this is the spot.
 	if (g_starvation_setting == STARVE_Q1_CONTEXT_SWITCH)
 	{
 		resched_starvation_check(g_starvation_seconds, g_starvation_increment);
@@ -202,21 +203,6 @@ void resched_starvation_check(
 				process_pt->prprio = min_priority;
 				queuetab[i].qkey = min_priority;
 			}
-			// // this proces's last used time is older enough.
-			// if (max_priority  > process_pt->prprio + starvation_increment)
-			// {
-			// 	// the priority is just one away from the max,
-			// 	// so just update it to the max
-			// 	process_pt->prprio = max_priority;
-			// }
-			// else
-			// {
-			// 	int32 percentage = (100 - (((int)clktime) - ((int)process_pt->last_touched))) / 10;
-			// 	if (percentage > 1)
-			// 	{
-			// 		process_pt->prprio = process_pt->prprio + (((max_priority - process_pt->prprio) / 2) / percentage);
-			// 	}
-			// }
 		}
 	}
 }

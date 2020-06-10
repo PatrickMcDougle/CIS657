@@ -7,7 +7,10 @@
 #define SLEEP_TIME_FIGHT 2000
 #define SLEEP_TIME_PRINT 500
 #define SETUP_SLEEP_TIME 300
+#define SLEEP_TIME_CHECK 2000
 
 extern uint8 g_starvation_setting;
 extern uint8 g_starvation_seconds;
 extern uint8 g_starvation_increment;
+
+extern uint8 g_is_starvation_checking;
