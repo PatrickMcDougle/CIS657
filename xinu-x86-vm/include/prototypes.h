@@ -59,6 +59,7 @@ extern syscall footsoldier(char *);
 extern syscall turtle(char *);
 extern void continuous_fight(char *);
 extern syscall print_process();
+extern syscall starvation_check(void);
 
 /* in file freebuf.c */
 extern syscall freebuf(char *);
@@ -219,6 +220,7 @@ extern umsg32 recvtime(int32);
 
 /* in file resched.c */
 extern void resched(void);
+extern void resched_starvation_check(uint8, uint8);
 
 /* in file intutils.S */
 extern void restore(intmask);

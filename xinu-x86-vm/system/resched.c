@@ -33,11 +33,8 @@ void resched(void) /* assumes interrupts are disabled	*/
 		/* process remains running */
 		if (ptold->prprio > firstkey(readylist))
 		{
-			if (g_starvation_setting == STARVE_Q1_CONTEXT_SWITCH)
-			{
-				// update current process last touch value to current clock time.
-				ptold->last_touched = clktime;
-			}
+			// update current process last touch value to current clock time.
+			ptold->last_touched = clktime;
 
 			// original (ptold) process is still the highest process to run.
 			// so just keep running it.
@@ -52,7 +49,7 @@ void resched(void) /* assumes interrupts are disabled	*/
 
 	if (g_starvation_setting == STARVE_Q1_CONTEXT_SWITCH)
 	{
-		_resched_q1(g_starvation_seconds, g_starvation_increment);
+		resched_starvation_check(g_starvation_seconds, g_starvation_increment);
 	}
 
 	/* Force context switch to highest priority ready process */
@@ -74,12 +71,12 @@ void resched(void) /* assumes interrupts are disabled	*/
 }
 
 /*------------------------------------------------------------------------
- *  _resched_q1  -  Prevent Starvation of process that have low priority 
- * 					by upping thier prioroty.
+ *  resched_starvation_check  -  Prevent Starvation of process that have
+ * 			low priority by upping thier prioroty.
  *------------------------------------------------------------------------
  */
-void _resched_q1(
-	uint8 starvation_seconds, /* The time to allow starvation to heppen before doing something. */
+void resched_starvation_check(
+	uint8 starvation_seconds,  /* The time to allow starvation to heppen before doing something. */
 	uint8 starvation_increment /* Increment the starving process by this ammount. */
 )
 {

@@ -5,20 +5,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SLEEP_TIME_FIGHT 2000
-#define SLEEP_TIME_PRINT 500
-#define SETUP_SLEEP_TIME 300
+/*------------------------------------------------------------------------
+ *  global setting for starvation.
+ *------------------------------------------------------------------------
+ */
+uint8 g_starvation_setting = 0;	  /* */
+uint8 g_starvation_seconds = 10;  /* */
+uint8 g_starvation_increment = 1; /* */
 
-int16 g_line_current = 0;
-int16 g_line_next = 0;
-
-// global setting for starvation.
-uint8 g_starvation_setting = 0;
-uint8 g_starvation_seconds = 10;
-uint8 g_starvation_increment = 1;
-
-int8 g_total_clan_membership = 0;
-int8 g_total_clan_sleeping = 0;
+/*------------------------------------------------------------------------
+ *  global values for only this file.
+ *------------------------------------------------------------------------
+ */
+int8 g_total_clan_membership = 0; /* keep track of # of resource hogs		*/
+int8 g_total_clan_sleeping = 0;	  /* keep track of sleeping resource hogs	*/
 
 /*------------------------------------------------------------------------
  *  footsoldier  -  a robot ninja. (resource hog)
@@ -191,6 +191,18 @@ syscall print_process()
 		}
 
 		sleepms(SLEEP_TIME_PRINT);
+	}
+	return OK;
+}
+
+syscall starvation_check(void)
+{
+	while (TRUE)
+	{
+		// sleep for 2 seconds then check if a process is starving.
+		sleep(2);
+
+		resched_starvation_check(g_starvation_seconds, g_starvation_increment);
 	}
 	return OK;
 }

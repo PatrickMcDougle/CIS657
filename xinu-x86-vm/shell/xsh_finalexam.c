@@ -117,7 +117,6 @@ shellcmd xsh_starve(int nargs, char *args[])
 
 	if (nargs == 2 && strncmp(args[1], "--help", 7) == 0)
 	{
-
 		printf("Use:\n");
 		printf("\t%s [set [sec [inc]]]\n", args[0]);
 		printf("Description:\n");
@@ -210,6 +209,12 @@ shellcmd xsh_starve(int nargs, char *args[])
 	default:
 		kprintf("???\n");
 		break;
+	}
+
+	if (g_starvation_setting == STARVE_Q2_2_SECONDS)
+	{
+		// start a timer to check for starvation.
+		resume(create(starvation_check, 1024, 400, "TMNT-2sec", 0));
 	}
 
 	kprintf("  Sec : %d\n", g_starvation_seconds);
