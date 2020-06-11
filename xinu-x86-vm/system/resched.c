@@ -57,7 +57,7 @@ void resched(void) /* assumes interrupts are disabled	*/
 	ptnew->prstate = PR_CURR;
 
 	// update new process last touch value to current clock time.
-	// TODO: @Patrick | This might be redundent.
+	// TODO: @Patrick | This might be redundant.
 	ptnew->last_touched = clktime;
 
 	preempt = QUANTUM; /* reset time slice for process	*/
