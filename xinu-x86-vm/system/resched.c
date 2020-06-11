@@ -3,9 +3,6 @@
 #include <xinu.h>
 #include <string.h>
 
-// function declearation for local only use functions.
-void _resched_q1(uint8, uint8);
-
 /*------------------------------------------------------------------------
  *  resched  -  Reschedule processor to highest priority eligible process
  *------------------------------------------------------------------------
