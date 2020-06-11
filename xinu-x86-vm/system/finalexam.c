@@ -126,10 +126,8 @@ void continuous_fight(char *my_name)
 		// disable interupts to make sure things are calculated correctly
 		mask = disable();
 
-		// if there is only one member in the clan
-		// or there is more than one clan member hogging resources
-		// sleep!
-		if (g_total_clan_membership == 1 || g_total_clan_membership - 1 > g_total_clan_sleeping)
+		// if there is more than one clan member hogging resources sleep!
+		if (g_total_clan_membership - 1 > g_total_clan_sleeping)
 		{
 			// update the number of clan members who are sleeping.
 			++g_total_clan_sleeping;
@@ -142,6 +140,10 @@ void continuous_fight(char *my_name)
 
 			// this process is done sleeping.
 			--g_total_clan_sleeping;
+
+			// now that this process is done sleeping, let another
+			// running resource sleep while this one runs.
+			resched();
 		}
 		else
 		{
